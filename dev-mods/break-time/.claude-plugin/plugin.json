@@ -15,5 +15,9 @@
       "description": "Length of the countdown shown in the Coffee break pane",
       "default": 5
     }
-  }
+  },
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }

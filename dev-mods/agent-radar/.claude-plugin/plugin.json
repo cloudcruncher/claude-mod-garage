@@ -9,5 +9,9 @@
       "description": "Open the pane automatically instead of waiting for /radar",
       "default": false
     }
-  }
+  },
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }

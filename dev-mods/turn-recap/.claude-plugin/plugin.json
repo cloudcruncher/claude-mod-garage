@@ -9,5 +9,9 @@
       "description": "Turns shorter than this show no recap",
       "default": 20
     }
-  }
+  },
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }
