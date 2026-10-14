@@ -65,9 +65,9 @@
       "description": "One command turns the session into a shareable markdown timeline."
     },
     {
-      "name": "session-deck",
-      "source": "./",
-      "description": "See and message your other live Claude sessions."
+      "name": "session-peers",
+      "source": "./dev-mods/session-peers",
+      "description": "Always-on band above the prompt listing every other open Claude Code session."
     },
     {
       "name": "break-time",

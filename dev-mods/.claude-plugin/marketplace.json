@@ -73,6 +73,11 @@
       "name": "arcade",
       "source": "./arcade",
       "description": "Doom-ish raycaster and Snake in a pane, for waiting on long runs."
+    },
+    {
+      "name": "session-peers",
+      "source": "./session-peers",
+      "description": "Always-on band above the prompt listing every other open Claude Code session."
     }
   ]
 }
