@@ -1,0 +1,5 @@
+{
+  "name": "session-peers",
+  "version": "0.1.0",
+  "description": "Always-on band above the prompt listing every other open Claude Code session: name, ref, kind, status and age."
+}

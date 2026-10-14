@@ -6,6 +6,8 @@ export type Call = {
   start: number
   end?: number
   isError?: boolean
+  /** First line of what the tool returned, once it finished. */
+  out?: string
 }
 
 const MAX_CALLS = 300
@@ -35,8 +37,35 @@ export function start(list: Call[], call: Call): Call[] {
   return [...list, call].slice(-MAX_CALLS)
 }
 
-export function finish(list: Call[], id: string, end: number, isError?: boolean): Call[] {
-  return list.map(c => (c.id === id ? { ...c, end, isError } : c))
+export function finish(list: Call[], id: string, end: number, isError?: boolean, out?: string): Call[] {
+  return list.map(c => (c.id === id ? { ...c, end, isError, out } : c))
+}
+
+/** One line of a tool's output for a row: the first, or for a failure the last (where the error message is). */
+export function preview(text: unknown, n = 90, fromEnd = false): string {
+  const lines = String(text ?? '').split('\n').map(l => l.trim()).filter(Boolean)
+  const line = (fromEnd ? lines[lines.length - 1] : lines[0]) ?? ''
+  return line.length > n ? line.slice(0, n - 1) + '…' : line
+}
+
+/** The visible text of an assistant row: its text blocks only (nothing else is read). */
+export function sayText(content: unknown): string {
+  if (!Array.isArray(content)) return ''
+  return content
+    .filter((b): b is { type: 'text'; text: string } => !!b && b.type === 'text' && typeof b.text === 'string')
+    .map(b => b.text)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export function clip(text: string, n: number): string {
+  return text.length > n ? text.slice(0, n - 1) + '…' : text
+}
+
+/** The newest n calls made inside one loop, oldest first. */
+export function lastCalls(list: Call[], agentId: string | undefined, n: number): Call[] {
+  return list.filter(c => c.agentId === agentId).slice(-n)
 }
 
 export function running(list: Call[]): Call[] {
