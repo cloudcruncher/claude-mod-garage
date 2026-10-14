@@ -1,0 +1,1 @@
+{"name":"context-guardian","version":"0.1.0","description":"Warns at 70% context and, at 85%, tells the model to wrap up and run /compact with keep-rules."}

@@ -1,0 +1,1 @@
+{"name":"auto-checkpoint","version":"0.1.0","description":"Snapshots files before edits and risky shell commands; /rewind-to restores them."}

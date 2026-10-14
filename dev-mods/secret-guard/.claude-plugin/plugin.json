@@ -1,0 +1,1 @@
+{"name":"secret-guard","version":"0.1.0","description":"Denies writing secret files, committing secrets, and pushing to main or force pushing."}

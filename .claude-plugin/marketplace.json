@@ -1,0 +1,63 @@
+{
+  "name": "robin-mods",
+  "owner": {
+    "name": "Robin Saini"
+  },
+  "plugins": [
+    {
+      "name": "agent-radar",
+      "source": "./dev-mods/agent-radar",
+      "description": "Live /radar pane: running tools, subagent roster, recent activity, files touched"
+    },
+    {
+      "name": "loop-breaker",
+      "source": "./dev-mods/loop-breaker",
+      "description": "Refuses a tool call repeated N times in a row and tells the model to change approach"
+    },
+    {
+      "name": "turn-recap",
+      "source": "./dev-mods/turn-recap",
+      "description": "One-line toast after long turns: duration, tool calls, files edited"
+    },
+    {
+      "name": "verify-gate",
+      "source": "./dev-mods/verify-gate",
+      "description": "Runs the project's fast checks after edits and sends failures back to the model"
+    },
+    {
+      "name": "secret-guard",
+      "source": "./dev-mods/secret-guard",
+      "description": "Blocks secret-file writes, committing secrets, and pushes to main or force pushes"
+    },
+    {
+      "name": "auto-checkpoint",
+      "source": "./dev-mods/auto-checkpoint",
+      "description": "Snapshots files before edits and risky commands; /rewind-to restores them"
+    },
+    {
+      "name": "context-guardian",
+      "source": "./dev-mods/context-guardian",
+      "description": "Warns at 70% context; at 85% tells the model to wrap up and /compact"
+    },
+    {
+      "name": "cost-router",
+      "source": "./dev-mods/cost-router",
+      "description": "Status line with 5h usage and context %, usage toasts, cheaper models for subagents"
+    },
+    {
+      "name": "break-time",
+      "source": "./dev-mods/break-time",
+      "description": "Coffee-break reminder pane with an animated countdown"
+    },
+    {
+      "name": "arcade",
+      "source": "./dev-mods/arcade",
+      "description": "/doom and /snake in a pane"
+    },
+    {
+      "name": "robin-mods",
+      "source": "./",
+      "description": "Peers (message other live sessions), risky-command prompt, turn chime, status pet"
+    }
+  ]
+}

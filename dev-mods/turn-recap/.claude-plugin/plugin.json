@@ -1,0 +1,13 @@
+{
+  "name": "turn-recap",
+  "version": "0.1.0",
+  "description": "After each long turn, a one-line toast: how long it took, how many tools ran, and which files were edited.",
+  "userConfig": {
+    "minSeconds": {
+      "type": "number",
+      "title": "Minimum turn length (seconds)",
+      "description": "Turns shorter than this show no recap",
+      "default": 20
+    }
+  }
+}

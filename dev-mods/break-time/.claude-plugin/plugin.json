@@ -1,0 +1,19 @@
+{
+  "name": "break-time",
+  "version": "0.1.0",
+  "description": "Coffee-break reminder: tracks active time and opens an animated ASCII pane with a countdown and stretch tips.",
+  "userConfig": {
+    "intervalMinutes": {
+      "type": "number",
+      "title": "Break interval (minutes)",
+      "description": "Active minutes between break reminders",
+      "default": 150
+    },
+    "breakMinutes": {
+      "type": "number",
+      "title": "Break length (minutes)",
+      "description": "Length of the countdown shown in the Coffee break pane",
+      "default": 5
+    }
+  }
+}

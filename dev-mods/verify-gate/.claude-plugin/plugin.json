@@ -1,0 +1,1 @@
+{"name":"verify-gate","version":"0.1.0","description":"Runs the project fast checks after a turn that edited files and sends failures back to the model."}

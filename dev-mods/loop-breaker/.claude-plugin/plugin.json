@@ -1,0 +1,13 @@
+{
+  "name": "loop-breaker",
+  "version": "0.1.0",
+  "description": "Stops the model repeating the same tool call over and over: after N identical calls in a row it refuses the next one and tells the model to change approach.",
+  "userConfig": {
+    "maxRepeats": {
+      "type": "number",
+      "title": "Identical calls allowed in a row",
+      "description": "The call after this many identical ones is refused",
+      "default": 3
+    }
+  }
+}

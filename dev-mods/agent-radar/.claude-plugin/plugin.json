@@ -1,0 +1,13 @@
+{
+  "name": "agent-radar",
+  "version": "0.1.0",
+  "description": "Live side pane (/radar) showing what Claude and its subagents are doing right now: running tools, agent roster, recent activity and files touched.",
+  "userConfig": {
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Open the radar pane at session start",
+      "description": "Open the pane automatically instead of waiting for /radar",
+      "default": false
+    }
+  }
+}

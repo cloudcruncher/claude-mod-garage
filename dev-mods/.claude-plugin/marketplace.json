@@ -1,0 +1,58 @@
+{
+  "name": "robin-dev-mods",
+  "owner": {
+    "name": "robin"
+  },
+  "plugins": [
+    {
+      "name": "agent-radar",
+      "source": "./agent-radar",
+      "description": "Live /radar pane: running tools, subagent roster, recent activity, files touched"
+    },
+    {
+      "name": "loop-breaker",
+      "source": "./loop-breaker",
+      "description": "Refuses a tool call repeated N times in a row and tells the model to change approach"
+    },
+    {
+      "name": "turn-recap",
+      "source": "./turn-recap",
+      "description": "One-line toast after long turns: duration, tool calls, files edited"
+    },
+    {
+      "name": "verify-gate",
+      "source": "./verify-gate",
+      "description": "Runs the project's fast checks after edits and sends failures back to the model"
+    },
+    {
+      "name": "secret-guard",
+      "source": "./secret-guard",
+      "description": "Blocks secret-file writes, committing secrets, and pushes to main or force pushes"
+    },
+    {
+      "name": "auto-checkpoint",
+      "source": "./auto-checkpoint",
+      "description": "Snapshots files before edits and risky commands; /rewind-to restores them"
+    },
+    {
+      "name": "context-guardian",
+      "source": "./context-guardian",
+      "description": "Warns at 70% context; at 85% tells the model to wrap up and /compact"
+    },
+    {
+      "name": "cost-router",
+      "source": "./cost-router",
+      "description": "Status line with 5h usage and context %, usage toasts, cheaper models for subagents"
+    },
+    {
+      "name": "break-time",
+      "source": "./break-time",
+      "description": "Coffee-break reminder pane with an animated countdown"
+    },
+    {
+      "name": "arcade",
+      "source": "./arcade",
+      "description": "/doom and /snake in a pane"
+    }
+  ]
+}
