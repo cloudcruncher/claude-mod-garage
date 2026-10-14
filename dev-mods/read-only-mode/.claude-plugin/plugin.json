@@ -1,0 +1,5 @@
+{
+  "name": "read-only-mode",
+  "version": "0.1.0",
+  "description": "/readonly on turns the session into look-but-don't-touch: file edits are refused and only read-only shell commands (ls, cat, git status/log/diff, grep...) run. Safe for exploring unfamiliar code or production checkouts."
+}

@@ -1,14 +1,38 @@
 # arcade
 
-Tiny text-mode games in a Claude Code pane.
+Doom-ish raycaster and Snake in a pane, for waiting on long runs.
 
-- `/doom`: a small raycaster. WASD or arrow keys move and turn (left/right arrows turn, A/D strafe), space shoots the `@` enemies when they are centred under the `+` crosshair, `q` closes. A minimap sits in the top-right corner.
-- `/snake`: WASD or arrows steer, `r` restarts, `q` closes.
+Tiny text-mode games that run inside Claude Code. /doom is a raycaster with wandering enemies and a minimap; /snake is classic snake.
 
-## Terminal size
+## Install
 
-- Doom: at least 40 columns by 16 rows of pane for a playable view; the minimap (16 columns by 12 rows) only appears when the pane is at least 20 columns wide and 14 rows tall. 80x30 or larger looks best. The view scales to the pane.
-- Snake: needs 26 columns by 16 rows.
-- Panes dock beside the transcript from about 110 terminal columns, else open inline above the prompt, so a fullscreen terminal of 120x40 or more is ideal.
-- Keys only reach a game while its pane has focus (`/doom` asks for focus; click the pane if keys go to the prompt). Esc returns focus to the prompt and closes the pane.
-- Key presses move in steps (the terminal gives no key-up), so tap rather than hold.
+```
+/plugin marketplace add <owner>/claude-mod-garage
+/plugin install arcade@mod-garage
+```
+
+Run `/reload-plugins` (or restart Claude Code) afterwards. To try it from a local clone without installing: `claude --plugin-dir ./dev-mods/arcade`
+
+## Use it
+
+- `/doom`: WASD/arrows move, space shoots, `q` quits.
+- `/snake`: WASD/arrows steer, `r` restarts, `q` quits.
+
+## What you'll see
+
+_Illustrative output._
+
+**/snake**
+
+```
+┌──────────────┐
+│              │
+│   ████►   ●  │
+│              │
+└──────────────┘  score 3
+```
+## Notes
+
+- Doom needs a pane of at least 40x16; 80x30 or larger looks best.
+- Keys only reach a game while its pane has focus. Esc closes it.
+- Key presses move in steps (terminals give no key-up), so tap rather than hold.

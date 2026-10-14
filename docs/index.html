@@ -1,0 +1,136 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claude Mod Garage</title><style>
+:root{--bg:#0e1116;--card:#161b22;--line:#262d38;--fg:#e6edf3;--dim:#8b96a5;--acc:#58d1a3;--acc2:#7aa2f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:56px 24px 32px;max-width:1040px;margin:auto}h1{font-size:2.4rem;margin:0 0 8px}h1 span{color:var(--acc)}
+.lead{color:var(--dim);max-width:62ch}main{max-width:1040px;margin:auto;padding:0 24px 80px}
+code,pre{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:24px 0 8px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}.step b{color:var(--acc)}
+.term{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;position:relative;background:#0a0d12;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;overflow-x:auto;white-space:pre-wrap;color:#cfe3d8}
+.term .cap{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.copy{position:absolute;top:8px;right:8px;background:var(--line);color:var(--fg);border:0;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,17,22,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav div{max-width:1040px;margin:auto;padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap}
+nav button{background:var(--card);color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:5px 14px;cursor:pointer;font-size:14px}
+nav button.on{color:#06140e;background:var(--acc);border-color:var(--acc)}
+h2{margin:44px 0 4px;font-size:1.4rem}.gd{color:var(--dim);margin:0 0 14px}
+.mod{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0}
+.mod h3{margin:0;font-size:1.15rem}.mod h3 code{color:var(--acc);font-size:1.1rem}.tag{color:var(--acc2);margin:2px 0 10px}
+.mod p{margin:8px 0}.lbl{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px}
+ul{margin:6px 0;padding-left:20px}li{margin:3px 0}.opt{color:var(--dim);font-size:14px}
+code.i{background:#0a0d12;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+footer{color:var(--dim);text-align:center;padding:40px}
+</style></head><body>
+<header><h1>Claude Mod <span>Garage</span></h1><p class="lead">Small, independent mods for Claude Code. Pick what you need, install in two commands, and see exactly what each one does before you do.</p>
+<div class="steps"><div class="step"><b>1</b> Add the marketplace (once)<div class='term'><button class='copy' data-t='/plugin marketplace add &lt;owner&gt;/claude-mod-garage'>copy</button>/plugin marketplace add &lt;owner&gt;/claude-mod-garage</div></div>
+<div class="step"><b>2</b> Install a mod<div class='term'><button class='copy' data-t='/plugin install agent-radar@mod-garage'>copy</button>/plugin install agent-radar@mod-garage</div></div>
+<div class="step"><b>3</b> Reload and use it<div class='term'><button class='copy' data-t='/reload-plugins'>copy</button>/reload-plugins</div></div></div></header>
+<nav><div><button class='on' data-f='all'>All</button><button data-f='watch'>Watch what&#x27;s happening</button><button data-f='protect'>Stay safe</button><button data-f='flow'>Quality &amp; flow</button><button data-f='sessions'>Multi-session</button><button data-f='fun'>Wellbeing &amp; fun</button><button data-f='companion'>claude-mods</button></div></nav><main><section data-g='watch'><h2>Watch what&#x27;s happening</h2><p class='gd'>See your agents, git state and spend without leaving the terminal.</p><article class='mod'><h3><code>agent-radar</code></h3><div class='tag'>A live side window showing what your agents are doing, in parallel.</div><p>Opens a pane beside the conversation that updates in real time: which tools are running right now, every subagent with its task and current tool, a scrolling activity log with elapsed times, and the files edited this session. Ideal when you fan out several subagents and want to see who is doing what.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install agent-radar@mod-garage'>copy</button>/plugin install agent-radar@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li><code class='i'>/radar</code> opens the pane (Esc closes it).</li><li>Set option <code class='i'>autoOpen</code> to open it at every session start.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>/radar pane</span>● 2 running  ·  14 calls  ·  2/3 agents active
+
+Agents
+▶ Explore · map auth flow  → Grep validateToken
+▶ general-purpose · write tests  → Edit auth/token.test.ts
+· Plan · outline migration
+
+Activity
+▶ [a3f1] Grep validateToken  2s
+▶ [9c20] Edit auth/token.test.ts  1s
+✓ Bash npm test  14s
+✗ Bash npx tsc --noEmit  6s
+✓ Read src/auth.ts  0s
+
+Files touched
+  auth/token.test.ts ×2
+  src/auth.ts</div>
+<div class="lbl">Options</div><ul><li><code class='i'>autoOpen</code> <span class='opt'>(default false) Open the pane automatically at session start</span></li></ul><div class="lbl">Notes</div><ul><li>Panes dock beside the transcript from about 110 terminal columns; narrower terminals show it above the prompt.</li><li><code class='i'>[a3f1]</code> is the first 4 characters of a subagent id; calls with no tag are the main session&#x27;s.</li></ul></article><article class='mod'><h3><code>git-band</code></h3><div class='tag'>Branch, dirty count and ahead/behind always visible above the prompt.</div><p>Adds one dim line above the prompt with the current git branch, how many files changed, and commits ahead or behind upstream. It refreshes after every turn and every 15 seconds, so you notice at a glance when Claude has modified files or you are on the wrong branch.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install git-band@mod-garage'>copy</button>/plugin install git-band@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed. Nothing to run.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Above the prompt</span>⎇ feature/login ● 3 changed ↑1
+&gt; _</div><div class='term'><span class='cap'>After committing</span>⎇ feature/login ✓ clean ↑2
+&gt; _</div>
+<div class="lbl">Notes</div><ul><li>Shows nothing outside a git repository.</li></ul></article><article class='mod'><h3><code>turn-recap</code></h3><div class='tag'>A toast after each long turn: how long, how many tools, which files.</div><p>When a turn runs longer than a threshold and used tools, shows a one-line toast so you can tab away during long runs and come back to a summary.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install turn-recap@mod-garage'>copy</button>/plugin install turn-recap@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Toast</span>Turn done in 1m 35s · 12 tool calls · 3 files edited</div>
+<div class="lbl">Options</div><ul><li><code class='i'>minSeconds</code> <span class='opt'>(default 20) Turns shorter than this show no recap</span></li></ul></article><article class='mod'><h3><code>cost-router</code></h3><div class='tag'>Usage in the status line, spend warnings, cheaper models for subagents.</div><p>Shows <code class='i'>5h NN% | ctx NN%</code> in the status line, toasts once when your 5-hour usage passes 70% and 85%, and picks haiku/sonnet/opus for subagents that were given no model, based on keywords in their task. Explicit models are never overridden.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install cost-router@mod-garage'>copy</button>/plugin install cost-router@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Status line</span>5h 62% | ctx 34%</div><div class='term'><span class='cap'>Toast</span>5h usage passed 70% (now 71%)</div>
+<div class="lbl">Notes</div><ul><li>With no subscription rate-limit data, values show as <code class='i'>n/a</code> and no toasts fire.</li></ul></article></section><section data-g='protect'><h2>Stay safe</h2><p class='gd'>Guardrails that stop mistakes before they cost you.</p><article class='mod'><h3><code>secret-guard</code></h3><div class='tag'>Stops secrets being written, committed or pushed.</div><p>Refuses to write <code class='i'>.env</code>, <code class='i'>.pem</code>, SSH keys and credentials files, refuses commands that contain API keys or high-entropy tokens, blocks <code class='i'>git add</code>/<code class='i'>commit</code> of staged secrets, and blocks pushes to main/master and force pushes. <code class='i'>.env.example</code>-style files are allowed.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install secret-guard@mod-garage'>copy</button>/plugin install secret-guard@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Model tries to write .env</span>secret-guard: refusing to write .env. .env is an environment file that usually holds secrets. Use a .env.example with placeholder values, or ask the user to edit it.</div><div class='term'><span class='cap'>Model tries to push</span>secret-guard: git push blocked: pushing to main is not allowed.</div>
+<div class="lbl">Notes</div><ul><li>Fails closed: if the guard itself errors, the write or git command is blocked.</li></ul></article><article class='mod'><h3><code>loop-breaker</code></h3><div class='tag'>Cuts off a model that keeps repeating the same tool call.</div><p>If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls. If the hook errors it fails open.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install loop-breaker@mod-garage'>copy</button>/plugin install loop-breaker@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Fourth identical call</span>This exact Bash call has already run 3 times in a row with the same arguments. Repeating it will not change the result. Re-read the output, change the arguments, or try a different approach.</div><div class='term'><span class='cap'>Toast</span>loop-breaker: refused a Bash call repeated 4 times</div>
+<div class="lbl">Options</div><ul><li><code class='i'>maxRepeats</code> <span class='opt'>(default 3) Identical calls allowed in a row</span></li></ul></article><article class='mod'><h3><code>read-only-mode</code></h3><div class='tag'>Look but don&#x27;t touch: explore a codebase with edits disabled.</div><p><code class='i'>/readonly on</code> refuses every file edit and every shell command that is not clearly read-only (ls, cat, grep, git status/log/diff, find without -delete...). Redirects, command substitution and unknown commands are refused. Great for onboarding to unfamiliar code or inspecting a production checkout.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install read-only-mode@mod-garage'>copy</button>/plugin install read-only-mode@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li><code class='i'>/readonly on</code> to enable, <code class='i'>/readonly off</code> to disable, <code class='i'>/readonly status</code> to check.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Enable</span>&gt; /readonly on
+Read-only mode ON: edits and mutating commands are refused.</div><div class='term'><span class='cap'>Model tries to edit</span>Read-only mode is on (the user ran /readonly on). Do not edit files; describe the change instead.</div><div class='term'><span class='cap'>Status line</span>🔒 read-only</div>
+<div class="lbl">Notes</div><ul><li>It is a guardrail on the model&#x27;s tool calls, not a sandbox: it does not stop you from running commands yourself.</li></ul></article><article class='mod'><h3><code>auto-checkpoint</code></h3><div class='tag'>Automatic snapshots before edits, so any change is undoable.</div><p>Snapshots files before the model edits them or runs risky shell commands. <code class='i'>/rewind-to</code> lists the checkpoints and restores one.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install auto-checkpoint@mod-garage'>copy</button>/plugin install auto-checkpoint@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Snapshots are automatic.</li><li><code class='i'>/rewind-to list</code> shows checkpoints; <code class='i'>/rewind-to 2</code> restores checkpoint 2.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>/rewind-to list</span>1  14:02  Edit src/auth.ts
+2  14:05  Edit src/auth.ts
+3  14:09  Bash git checkout -- .</div><div class='term'><span class='cap'>/rewind-to 2</span>Rewound to checkpoint 2:
+restored src/auth.ts</div>
+<div class="lbl">Notes</div><ul><li>Output format shown is illustrative.</li></ul></article><article class='mod'><h3><code>context-guardian</code></h3><div class='tag'>Warns before the context window fills up.</div><p>Toasts at 70% context. At 85% it also adds an instruction telling the model to wrap up the current step and run <code class='i'>/compact</code>, keeping the task, changed files, failing output, decisions and branch state.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install context-guardian@mod-garage'>copy</button>/plugin install context-guardian@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>At 70%</span>Context is 70% full. Consider /compact or delegating.</div><div class='term'><span class='cap'>At 85% (sent to the model)</span>Context is nearly full (85% or more). Wrap up the current step, then run /compact.</div>
+<div class="lbl">Notes</div><ul><li>Toast wording is illustrative.</li></ul></article></section><section data-g='flow'><h2>Quality &amp; flow</h2><p class='gd'>Faster prompts, automatic checks, and a record of what happened.</p><article class='mod'><h3><code>verify-gate</code></h3><div class='tag'>Runs your tests, lint and type-check after edits, and feeds failures back.</div><p>After a turn that edited code, detects your project&#x27;s fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest, ruff, mypy/pyright via uv; <code class='i'>make test</code>) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Docs, images and config edits are ignored.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install verify-gate@mod-garage'>copy</button>/plugin install verify-gate@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic once installed. Needs a recognisable project (package.json, pyproject.toml or Makefile).</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>All green</span>verified</div><div class='term'><span class='cap'>Gives up</span>verify-gate: still failing after 3 retries, giving up this turn</div>
+</article><article class='mod'><h3><code>prompt-snippets</code></h3><div class='tag'>Type ;review or ;tests and it expands into a full instruction.</div><p>Short <code class='i'>;name</code> shortcuts in a prompt expand to reusable instructions before Claude sees them. Ships with ;review ;tests ;plan ;explain ;short ;fix, and you can add your own.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install prompt-snippets@mod-garage'>copy</button>/plugin install prompt-snippets@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Type <code class='i'>;name</code> anywhere at the start of a word in a prompt.</li><li><code class='i'>/snippets</code> lists everything available.</li><li>Add your own with the <code class='i'>extraSnippets</code> option (a JSON object).</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>You type</span>refactor the parser ;plan ;short</div><div class='term'><span class='cap'>Claude receives</span>refactor the parser Before editing anything, outline a short plan: the goal, the files you will touch and how you will verify it. Then proceed. Keep the answer under 5 lines. Results first, no preamble.</div><div class='term'><span class='cap'>/snippets</span>;review  Review the current changes for correctness bugs, security issues and missed…
+;tests   Write focused tests for the behaviour above, run them, and report the result…
+;plan    Before editing anything, outline a short plan: the goal, the files you will touc…</div>
+<div class="lbl">Options</div><ul><li><code class='i'>extraSnippets</code> <span class='opt'>(default (empty)) JSON object of name -&gt; text, e.g. {&quot;ship&quot;:&quot;Run the checks, then commit and push.&quot;}</span></li></ul><div class="lbl">Notes</div><ul><li>Unknown names such as <code class='i'>;foo</code> are left untouched.</li></ul></article><article class='mod'><h3><code>session-journal</code></h3><div class='tag'>One command turns the session into a shareable markdown timeline.</div><p>Quietly records your prompts, shell commands run and files edited. <code class='i'>/journal</code> writes them to <code class='i'>.claude/journal/&lt;date-time&gt;.md</code>, grouped under each prompt with a files-changed summary. Good for handoffs, standups and PR descriptions.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install session-journal@mod-garage'>copy</button>/plugin install session-journal@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li><code class='i'>/journal</code> any time; run it again to refresh the same file.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>/journal</span>Journal written to .claude/journal/2026-10-14-09-30.md (23 entries).</div><div class='term'><span class='cap'>The file</span># Session 2026-10-14 09:30
+
+## 09:30 · fix the login redirect
+
+- ran `npm test`
+- edited `src/auth.ts`
+- ran `npm test`
+
+## Files changed
+
+- `src/auth.ts` (×1)</div>
+<div class="lbl">Notes</div><ul><li>Add <code class='i'>.claude/journal/</code> to .gitignore if you don&#x27;t want to commit journals.</li><li>Records are kept in memory (last 1000 entries), so a restart starts a fresh journal.</li></ul></article></section><section data-g='sessions'><h2>Multi-session</h2><p class='gd'>Run several Claude sessions and keep them aware of each other.</p><article class='mod'><h3><code>session-deck</code></h3><div class='tag'>See and message your other live Claude sessions.</div><p>Keeps a shared roster of your running sessions (project, model, one-line AI summary of what each is doing). <code class='i'>/live</code> opens a pane with the roster, usage bars and a small pet; <code class='i'>/peers</code> lists other sessions; <code class='i'>/tell</code> sends one a message. Also asks before risky shell commands (force-delete, force-push, publishing) and chimes after turns longer than 30s.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install session-deck@mod-garage'>copy</button>/plugin install session-deck@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li><code class='i'>/live</code> opens the pane, <code class='i'>/peers</code> lists sessions, <code class='i'>/tell &lt;id-prefix&gt; &lt;text&gt;</code> messages one.</li><li>The risky-command prompt and the chime are automatic.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>/peers</span>a1b2c3d4  sonnet  /work/api   fixing token refresh bug
+9f8e7d6c  opus    /work/web   reviewing checkout redesign</div><div class='term'><span class='cap'>/tell 9f8e Please rebase on main</span>Sent to 9f8e7d6c</div><div class='term'><span class='cap'>Risky command prompt</span>DESTRUCTIVE: force/recursive delete | run it? rm -rf src
+  [Run it]  [Refuse]</div>
+<div class="lbl">Notes</div><ul><li>Sessions only see each other on the same machine and user.</li><li>Install name: <code class='i'>session-deck</code> (the repo root is itself a plugin).</li></ul></article></section><section data-g='fun'><h2>Wellbeing &amp; fun</h2><p class='gd'>For the long runs.</p><article class='mod'><h3><code>break-time</code></h3><div class='tag'>A coffee-break reminder with an animated pane.</div><p>Tracks active time and, after a while, toasts and opens an animated ASCII coffee-break pane with a countdown and stretch tips.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install break-time@mod-garage'>copy</button>/plugin install break-time@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li>Automatic reminders.</li><li><code class='i'>/break</code> starts a break now, <code class='i'>/break-skip</code> snoozes 15 minutes, <code class='i'>/break-done</code> resets the timer.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>Toast</span>Time for a coffee break. Run /break (or /break-skip to snooze).</div>
+<div class="lbl">Options</div><ul><li><code class='i'>intervalMinutes</code> <span class='opt'>(default 150) Active minutes between reminders</span></li><li><code class='i'>breakMinutes</code> <span class='opt'>(default 5) Countdown length</span></li></ul></article><article class='mod'><h3><code>arcade</code></h3><div class='tag'>Doom-ish raycaster and Snake in a pane, for waiting on long runs.</div><p>Tiny text-mode games that run inside Claude Code. /doom is a raycaster with wandering enemies and a minimap; /snake is classic snake.</p>
+<div class='lbl'>Install</div><div class='term'><button class='copy' data-t='/plugin install arcade@mod-garage'>copy</button>/plugin install arcade@mod-garage</div>
+<div class='lbl'>Activate</div><ul><li><code class='i'>/doom</code>: WASD/arrows move, space shoots, <code class='i'>q</code> quits.</li><li><code class='i'>/snake</code>: WASD/arrows steer, <code class='i'>r</code> restarts, <code class='i'>q</code> quits.</li></ul>
+<div class='lbl'>What you'll see (illustrative)</div><div class='term'><span class='cap'>/snake</span>┌──────────────┐
+│              │
+│   ████►   ●  │
+│              │
+└──────────────┘  score 3</div>
+<div class="lbl">Notes</div><ul><li>Doom needs a pane of at least 40x16; 80x30 or larger looks best.</li><li>Keys only reach a game while its pane has focus. Esc closes it.</li><li>Key presses move in steps (terminals give no key-up), so tap rather than hold.</li></ul></article></section><section data-g='companion'><h2>Companion plugin: claude-mods</h2><p class='gd'>Cost-aware agent team: tier router, swarm conductor, cost guard, notifications and output styles.</p>
+<article class='mod'><ul><li><b>Agents</b>: <code class='i'>scout</code> (Haiku, read-only: search and triage), <code class='i'>builder</code> (Sonnet: implementation), <code class='i'>reviewer</code> (Opus, read-only: review and security), <code class='i'>planner</code>, <code class='i'>integrator</code> (merges parallel worktrees).</li><li><b>Skills</b>: <code class='i'>claude-mods:route</code> picks the cheapest adequate model tier and delegates; <code class='i'>claude-mods:swarm</code> runs a tiered agent team with quality gates and a live board.</li><li><b>Commands</b>: <code class='i'>/claude-mods:tier &lt;task&gt;</code> recommends a model tier; <code class='i'>/claude-mods:budget</code> shows context, 5h usage, cost and cache warmth; <code class='i'>/claude-mods:swarm</code> runs the swarm; <code class='i'>/claude-mods:audit</code> checks whether your CLAUDE.md rules are still needed.</li><li><b>Hooks</b>: cost-guard (warns at 70% context or 80% 5h usage), notify (macOS notification after long turns), resume-recap (handoff note between sessions), cache-keeper (cache warmth for a status line).</li><li><b>Output styles</b>: <code class='i'>terse</code> and <code class='i'>mentor</code>, selected with <code class='i'>/output-style</code>.</li></ul><div class='lbl'>Load it</div><div class='term'><button class='copy' data-t='claude --plugin-dir ~/projects/claude-mods
+# or keep it permanently: alias cc=&#x27;claude --plugin-dir ~/projects/claude-mods&#x27;'>copy</button>claude --plugin-dir ~/projects/claude-mods
+# or keep it permanently: alias cc=&#x27;claude --plugin-dir ~/projects/claude-mods&#x27;</div></article></section></main><footer>MIT licensed · Output samples are illustrative</footer><script>
+const btns=document.querySelectorAll('nav button');
+btns.forEach(b=>b.onclick=()=>{btns.forEach(x=>x.classList.remove('on'));b.classList.add('on');
+document.querySelectorAll('[data-g]').forEach(s=>s.style.display=(b.dataset.f==='all'||s.dataset.g===b.dataset.f)?'':'none')});
+document.querySelectorAll('.copy').forEach(c=>c.onclick=()=>{navigator.clipboard.writeText(c.dataset.t);const o=c.textContent;c.textContent='copied';setTimeout(()=>c.textContent=o,1200)});
+</script></body></html>

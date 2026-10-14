@@ -1,0 +1,5 @@
+{
+  "name": "git-band",
+  "version": "0.1.0",
+  "description": "A one-line band above the prompt showing the git branch, changed-file count and ahead/behind, refreshed after every turn."
+}

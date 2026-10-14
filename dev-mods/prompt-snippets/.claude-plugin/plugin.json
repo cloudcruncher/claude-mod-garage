@@ -1,0 +1,13 @@
+{
+  "name": "prompt-snippets",
+  "version": "0.1.0",
+  "description": "Type ;review, ;tests, ;plan and friends in a prompt and they expand to full instructions. Add your own via the extraSnippets option. /snippets lists them.",
+  "userConfig": {
+    "extraSnippets": {
+      "type": "string",
+      "title": "Extra snippets (JSON)",
+      "description": "A JSON object of name -> text, e.g. {\"ship\":\"Run the checks, then commit and push.\"}. Used as ;name in a prompt.",
+      "default": ""
+    }
+  }
+}

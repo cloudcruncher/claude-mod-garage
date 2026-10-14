@@ -1,1 +1,5 @@
-{"name":"robin-mods","version":"0.1.0","description":"Peers (session-to-session messaging), risky-command guard, turn chime"}
+{
+  "name": "session-deck",
+  "version": "0.1.0",
+  "description": "See and message your other live Claude sessions (/live, /peers, /tell), confirm risky shell commands, chime after long turns."
+}

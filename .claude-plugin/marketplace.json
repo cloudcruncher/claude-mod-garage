@@ -1,5 +1,5 @@
 {
-  "name": "robin-mods",
+  "name": "mod-garage",
   "owner": {
     "name": "Robin Saini"
   },
@@ -7,57 +7,77 @@
     {
       "name": "agent-radar",
       "source": "./dev-mods/agent-radar",
-      "description": "Live /radar pane: running tools, subagent roster, recent activity, files touched"
+      "description": "A live side window showing what your agents are doing, in parallel."
     },
     {
-      "name": "loop-breaker",
-      "source": "./dev-mods/loop-breaker",
-      "description": "Refuses a tool call repeated N times in a row and tells the model to change approach"
+      "name": "git-band",
+      "source": "./dev-mods/git-band",
+      "description": "Branch, dirty count and ahead/behind always visible above the prompt."
     },
     {
       "name": "turn-recap",
       "source": "./dev-mods/turn-recap",
-      "description": "One-line toast after long turns: duration, tool calls, files edited"
-    },
-    {
-      "name": "verify-gate",
-      "source": "./dev-mods/verify-gate",
-      "description": "Runs the project's fast checks after edits and sends failures back to the model"
-    },
-    {
-      "name": "secret-guard",
-      "source": "./dev-mods/secret-guard",
-      "description": "Blocks secret-file writes, committing secrets, and pushes to main or force pushes"
-    },
-    {
-      "name": "auto-checkpoint",
-      "source": "./dev-mods/auto-checkpoint",
-      "description": "Snapshots files before edits and risky commands; /rewind-to restores them"
-    },
-    {
-      "name": "context-guardian",
-      "source": "./dev-mods/context-guardian",
-      "description": "Warns at 70% context; at 85% tells the model to wrap up and /compact"
+      "description": "A toast after each long turn: how long, how many tools, which files."
     },
     {
       "name": "cost-router",
       "source": "./dev-mods/cost-router",
-      "description": "Status line with 5h usage and context %, usage toasts, cheaper models for subagents"
+      "description": "Usage in the status line, spend warnings, cheaper models for subagents."
+    },
+    {
+      "name": "secret-guard",
+      "source": "./dev-mods/secret-guard",
+      "description": "Stops secrets being written, committed or pushed."
+    },
+    {
+      "name": "loop-breaker",
+      "source": "./dev-mods/loop-breaker",
+      "description": "Cuts off a model that keeps repeating the same tool call."
+    },
+    {
+      "name": "read-only-mode",
+      "source": "./dev-mods/read-only-mode",
+      "description": "Look but don't touch: explore a codebase with edits disabled."
+    },
+    {
+      "name": "auto-checkpoint",
+      "source": "./dev-mods/auto-checkpoint",
+      "description": "Automatic snapshots before edits, so any change is undoable."
+    },
+    {
+      "name": "context-guardian",
+      "source": "./dev-mods/context-guardian",
+      "description": "Warns before the context window fills up."
+    },
+    {
+      "name": "verify-gate",
+      "source": "./dev-mods/verify-gate",
+      "description": "Runs your tests, lint and type-check after edits, and feeds failures back."
+    },
+    {
+      "name": "prompt-snippets",
+      "source": "./dev-mods/prompt-snippets",
+      "description": "Type ;review or ;tests and it expands into a full instruction."
+    },
+    {
+      "name": "session-journal",
+      "source": "./dev-mods/session-journal",
+      "description": "One command turns the session into a shareable markdown timeline."
+    },
+    {
+      "name": "session-deck",
+      "source": "./",
+      "description": "See and message your other live Claude sessions."
     },
     {
       "name": "break-time",
       "source": "./dev-mods/break-time",
-      "description": "Coffee-break reminder pane with an animated countdown"
+      "description": "A coffee-break reminder with an animated pane."
     },
     {
       "name": "arcade",
       "source": "./dev-mods/arcade",
-      "description": "/doom and /snake in a pane"
-    },
-    {
-      "name": "robin-mods",
-      "source": "./",
-      "description": "Peers (message other live sessions), risky-command prompt, turn chime, status pet"
+      "description": "Doom-ish raycaster and Snake in a pane, for waiting on long runs."
     }
   ]
 }

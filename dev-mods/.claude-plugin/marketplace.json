@@ -7,52 +7,72 @@
     {
       "name": "agent-radar",
       "source": "./agent-radar",
-      "description": "Live /radar pane: running tools, subagent roster, recent activity, files touched"
+      "description": "A live side window showing what your agents are doing, in parallel."
     },
     {
-      "name": "loop-breaker",
-      "source": "./loop-breaker",
-      "description": "Refuses a tool call repeated N times in a row and tells the model to change approach"
+      "name": "git-band",
+      "source": "./git-band",
+      "description": "Branch, dirty count and ahead/behind always visible above the prompt."
     },
     {
       "name": "turn-recap",
       "source": "./turn-recap",
-      "description": "One-line toast after long turns: duration, tool calls, files edited"
-    },
-    {
-      "name": "verify-gate",
-      "source": "./verify-gate",
-      "description": "Runs the project's fast checks after edits and sends failures back to the model"
-    },
-    {
-      "name": "secret-guard",
-      "source": "./secret-guard",
-      "description": "Blocks secret-file writes, committing secrets, and pushes to main or force pushes"
-    },
-    {
-      "name": "auto-checkpoint",
-      "source": "./auto-checkpoint",
-      "description": "Snapshots files before edits and risky commands; /rewind-to restores them"
-    },
-    {
-      "name": "context-guardian",
-      "source": "./context-guardian",
-      "description": "Warns at 70% context; at 85% tells the model to wrap up and /compact"
+      "description": "A toast after each long turn: how long, how many tools, which files."
     },
     {
       "name": "cost-router",
       "source": "./cost-router",
-      "description": "Status line with 5h usage and context %, usage toasts, cheaper models for subagents"
+      "description": "Usage in the status line, spend warnings, cheaper models for subagents."
+    },
+    {
+      "name": "secret-guard",
+      "source": "./secret-guard",
+      "description": "Stops secrets being written, committed or pushed."
+    },
+    {
+      "name": "loop-breaker",
+      "source": "./loop-breaker",
+      "description": "Cuts off a model that keeps repeating the same tool call."
+    },
+    {
+      "name": "read-only-mode",
+      "source": "./read-only-mode",
+      "description": "Look but don't touch: explore a codebase with edits disabled."
+    },
+    {
+      "name": "auto-checkpoint",
+      "source": "./auto-checkpoint",
+      "description": "Automatic snapshots before edits, so any change is undoable."
+    },
+    {
+      "name": "context-guardian",
+      "source": "./context-guardian",
+      "description": "Warns before the context window fills up."
+    },
+    {
+      "name": "verify-gate",
+      "source": "./verify-gate",
+      "description": "Runs your tests, lint and type-check after edits, and feeds failures back."
+    },
+    {
+      "name": "prompt-snippets",
+      "source": "./prompt-snippets",
+      "description": "Type ;review or ;tests and it expands into a full instruction."
+    },
+    {
+      "name": "session-journal",
+      "source": "./session-journal",
+      "description": "One command turns the session into a shareable markdown timeline."
     },
     {
       "name": "break-time",
       "source": "./break-time",
-      "description": "Coffee-break reminder pane with an animated countdown"
+      "description": "A coffee-break reminder with an animated pane."
     },
     {
       "name": "arcade",
       "source": "./arcade",
-      "description": "/doom and /snake in a pane"
+      "description": "Doom-ish raycaster and Snake in a pane, for waiting on long runs."
     }
   ]
 }
