@@ -2,7 +2,7 @@
 
 A live side window showing what your agents are doing, in parallel.
 
-Opens a pane beside the conversation that updates in real time. It shows the tool running right now (with a ticking timer) and what the model last said in its visible messages, every subagent with its recent calls and latest message, an activity log with a one-line result under each call, the files edited this session, and turn time, context and 5h usage in the header. Ideal when you fan out several subagents and want to see who is doing what.
+Opens a pane beside the conversation that updates in real time. It shows what each loop is doing right now (thinking, writing its next message, starting a tool call) and the tool running (with a ticking timer) and what the model last said in its visible messages, every subagent with its recent calls and latest message, an activity log with a one-line result under each call, the files edited this session, and in the header a working/idle state, turn time, a context bar that shows how much this turn has added, and 5h usage. Ideal when you fan out several subagents and want to see who is doing what.
 
 ## Install
 
@@ -25,9 +25,11 @@ _Illustrative output._
 **/radar pane**
 
 ```
-● 2 running  ·  turn 1m12s  ·  14 calls  ·  ctx 34%  ·  5h 8%
+● working (2 tools running)  ·  turn 1m12s  ·  14 calls  ·  5h 8%
+ctx ███░░░░░░░ 34%  (+6% this turn)
 
 Now
+● main writing: “Running the suite before I touch the parser…”  3s
 ▶ Bash npm test -- --watch=false  8s
 ▶ [a3f1] Grep validateToken  2s
   “Running the suite before I touch the parser, then I'll fix whatever fails.”

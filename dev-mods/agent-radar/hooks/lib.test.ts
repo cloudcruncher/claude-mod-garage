@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { clip, filesTouched, finish, fmtDur, label, lastCalls, latestFor, preview, running, sayText, start, type Call } from './lib'
+import { clip, filesTouched, finish, fmtDur, label, lastCalls, latestFor, nextLive, bar, preview, running, sayText, start, type Call } from './lib'
 
 const call = (id: string, tool: string, lbl = '', agentId?: string): Call => ({ id, tool, label: lbl, start: 0, agentId })
 
@@ -75,4 +75,24 @@ test('lastCalls and clip', () => {
 
 test('preview of a failure reads the last line', () => {
   expect(preview('Exit code 2\nls: /x: No such file or directory', 90, true)).toBe('ls: /x: No such file or directory')
+})
+
+test('nextLive: text accumulates while writing and thinking keeps no text', () => {
+    let l = nextLive(undefined, { kind: 'thinking', text: 'secret reasoning' }, 1)
+    expect(l.phase).toBe('thinking')
+    expect(l.text).toBe('')
+    l = nextLive(l, { kind: 'text', text: 'Hello ' }, 2)
+    l = nextLive(l, { kind: 'text', text: 'world' }, 3)
+    expect(l).toMatchObject({ phase: 'writing', text: 'Hello world', since: 2 })
+  })
+test('nextLive: tool chunk switches to calling and ignores other kinds', () => {
+    const l = nextLive({ phase: 'writing', since: 1, text: 'x' }, { kind: 'tool', name: 'Bash' }, 5)
+    expect(l).toMatchObject({ phase: 'calling', tool: 'Bash', since: 5 })
+    expect(nextLive(l, { kind: 'stop' }, 6)).toBe(l)
+  })
+
+test('bar fills proportionally and clamps', () => {
+  expect(bar(50)).toBe('█████░░░░░')
+  expect(bar(150)).toBe('██████████')
+  expect(bar(-5)).toBe('░░░░░░░░░░')
 })

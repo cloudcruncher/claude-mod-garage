@@ -1,5 +1,5 @@
 import type { Register } from 'claude-code'
-import { clip, filesTouched, finish, fmtDur, label, lastCalls, preview, running, sayText, start, type Call } from './lib'
+import { clip, filesTouched, finish, fmtDur, label, bar, lastCalls, nextLive, preview, running, sayText, start, type Call, type Live } from './lib'
 
 const PANE = 'radar'
 // Engine bookkeeping calls that are noise in a view of what the agents are doing.
@@ -9,7 +9,10 @@ export const register: Register = (on, options) => {
   let calls: Call[] = []
   // The latest thing each loop wrote to the conversation, keyed by agent id ('main' for the main loop).
   let says: Record<string, string> = {}
+  // What each loop is doing between tool calls (thinking, writing, starting a call), from the response stream.
+  let liveState: Record<string, Live> = {}
   let turnStart = 0
+  let ctxAtTurnStart: number | undefined
   let isOpen = false
   const autoOpen = options?.autoOpen === true
 
@@ -29,6 +32,7 @@ export const register: Register = (on, options) => {
 
   on('prompt.submit', async ($, e, next) => {
     turnStart = await $.clock.now()
+    ctxAtTurnStart = (await $.session.usage().catch(() => undefined))?.context?.percent
     return next(e)
   }).catch(($, e, next) => next(e))
 
@@ -57,12 +61,40 @@ export const register: Register = (on, options) => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  // The model's response as it streams. Text is shown live, thinking only as "thinking"; every chunk passes on untouched.
+  on('turn.step', async function* ($, e, next) {
+    const key = e.agentId ?? 'main'
+    liveState = { ...liveState, [key]: { phase: 'waiting', since: await $.clock.now(), text: '' } }
+    $.ui.invalidate('ui.render')
+    const stream = next(e)
+    try {
+      for (;;) {
+        const it = await stream.next()
+        if (it.done) return it.value
+        const c = it.value as { kind: string; text?: string; name?: string }
+        if (c.kind === 'text' || c.kind === 'thinking' || c.kind === 'tool') {
+          const before = liveState[key]
+          const after = nextLive(before, c, await $.clock.now())
+          liveState = { ...liveState, [key]: after }
+          if (!before || before.phase !== after.phase) $.ui.invalidate('ui.render')
+        }
+        yield it.value
+      }
+    } finally {
+      const { [key]: _gone, ...rest } = liveState
+      liveState = rest
+      $.ui.invalidate('ui.render')
+    }
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
+    isOpen = true
     const { Box, Text } = $.ui.resolve(e)
     const now = await $.clock.now()
     const agents = await $.agent.list()
     const usage = await $.session.usage().catch(() => undefined)
     const live = running(calls)
+    const busy = live.length + Object.keys(liveState).length
     const spawned = calls.filter(c => c.tool === 'Agent').length
     const rows = Math.max(8, (e.viewport?.rows ?? 30) - 4)
     const recent = calls.slice(-Math.max(4, Math.floor(rows / 3))).reverse()
@@ -75,10 +107,14 @@ export const register: Register = (on, options) => {
 
     return (
       <Box flexDirection="column">
-        <Text bold>{live.length ? `● ${live.length} running` : '○ idle'}{turnStart ? `  ·  turn ${fmtDur(now - turnStart)}` : ''}  ·  {calls.length} calls{ctx !== undefined ? `  ·  ctx ${Math.round(ctx)}%` : ''}{five !== undefined ? `  ·  5h ${Math.round(five)}%` : ''}</Text>
+        <Text bold>{busy ? `● working (${live.length} tool${live.length === 1 ? '' : 's'} running)` : '○ idle'}{turnStart ? `  ·  turn ${fmtDur(now - turnStart)}` : ''}  ·  {calls.length} calls{five !== undefined ? `  ·  5h ${Math.round(five)}%` : ''}</Text>
+        {ctx !== undefined && <Text color={ctx >= 85 ? 'red' : ctx >= 70 ? 'yellow' : undefined}>ctx {bar(ctx)} {Math.round(ctx)}%{ctxAtTurnStart !== undefined && ctx - ctxAtTurnStart >= 1 ? `  (+${Math.round(ctx - ctxAtTurnStart)}% this turn)` : ''}</Text>}
         <Text> </Text>
         <Text bold>Now</Text>
-        {live.length === 0 && <Text dimColor>  waiting</Text>}
+        {Object.entries(liveState).map(([k, l]) => (
+          <Text wrap="wrap" color="cyan">● {k === 'main' ? 'main' : `[${k.slice(0, 4)}]`} {l.phase === 'thinking' ? 'thinking…' : l.phase === 'writing' ? `writing: “${clip(l.text, 160)}”` : l.phase === 'calling' ? `starting ${l.tool ?? 'a tool'}…` : 'waiting for the model…'}  {fmtDur(now - l.since)}</Text>
+        ))}
+        {live.length === 0 && Object.keys(liveState).length === 0 && <Text dimColor>  idle</Text>}
         {live.slice(-4).map(c => (
           <Text wrap="wrap" color="yellow">▶ {c.agentId ? `[${c.agentId.slice(0, 4)}] ` : ''}{c.tool} {clip(c.label, 140)}  {age(c)}</Text>
         ))}
