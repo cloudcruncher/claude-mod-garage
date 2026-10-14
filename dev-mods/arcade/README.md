@@ -7,7 +7,7 @@ Tiny text-mode games that run inside Claude Code. /doom is a raycaster with wand
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install arcade@mod-garage
 ```
 

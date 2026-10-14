@@ -7,7 +7,7 @@ Tracks active time and, after a while, toasts and opens an animated ASCII coffee
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install break-time@mod-garage
 ```
 

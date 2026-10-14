@@ -7,7 +7,7 @@ After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install verify-gate@mod-garage
 ```
 

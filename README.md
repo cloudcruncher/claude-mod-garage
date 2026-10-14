@@ -7,7 +7,7 @@ Keeps a shared roster of your running sessions (project, model, one-line AI summ
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install session-deck@mod-garage
 ```
 

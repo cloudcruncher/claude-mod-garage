@@ -7,7 +7,7 @@ Adds one dim line above the prompt with the current git branch, how many files c
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install git-band@mod-garage
 ```
 

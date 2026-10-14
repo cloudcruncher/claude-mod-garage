@@ -7,7 +7,7 @@ If the same tool is called with identical arguments more than N times in a row, 
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install loop-breaker@mod-garage
 ```
 

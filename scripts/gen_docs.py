@@ -124,7 +124,7 @@ Files touched
   notes=["Doom needs a pane of at least 40x16; 80x30 or larger looks best.", "Keys only reach a game while its pane has focus. Esc closes it.", "Key presses move in steps (terminals give no key-up), so tap rather than hold."]),
 ]
 
-COMPANION = dict(name="claude-mods", repo="~/projects/claude-mods", tagline="Cost-aware agent team: tier router, swarm conductor, cost guard, notifications and output styles.",
+COMPANION = dict(name="claude-mods", repo="/path/to/claude-mods", tagline="Cost-aware agent team: tier router, swarm conductor, cost guard, notifications and output styles.",
   parts=[
    ("Agents", "`scout` (Haiku, read-only: search and triage), `builder` (Sonnet: implementation), `reviewer` (Opus, read-only: review and security), `planner`, `integrator` (merges parallel worktrees)."),
    ("Skills", "`claude-mods:route` picks the cheapest adequate model tier and delegates; `claude-mods:swarm` runs a tiered agent team with quality gates and a live board."),
@@ -132,7 +132,7 @@ COMPANION = dict(name="claude-mods", repo="~/projects/claude-mods", tagline="Cos
    ("Hooks", "cost-guard (warns at 70% context or 80% 5h usage), notify (macOS notification after long turns), resume-recap (handoff note between sessions), cache-keeper (cache warmth for a status line)."),
    ("Output styles", "`terse` and `mentor`, selected with `/output-style`."),
   ],
-  install=["claude --plugin-dir ~/projects/claude-mods", "# or keep it permanently: alias cc='claude --plugin-dir ~/projects/claude-mods'"])
+  install=["claude --plugin-dir /path/to/claude-mods", "# or keep it permanently: alias cc='claude --plugin-dir /path/to/claude-mods'"])
 
 def opts_md(m):
     if not m["options"]: return ""
@@ -142,7 +142,7 @@ def opts_md(m):
 def install_block(m):
     name = m["id"]
     return f"""```
-/plugin marketplace add <owner>/{REPO}
+/plugin marketplace add cloudcruncher/{REPO}
 /plugin install {name}@{MARKET}
 ```"""
 
@@ -183,7 +183,7 @@ A shelf of small, independent mods for [Claude Code](https://claude.com/claude-c
 
 1. Add the marketplace once:
    ```
-   /plugin marketplace add <owner>/{REPO}
+   /plugin marketplace add cloudcruncher/{REPO}
    ```
 2. Install any mod by name:
    ```
@@ -292,7 +292,7 @@ def page():
 <article class='mod'><ul>{parts}</ul><div class='lbl'>Load it</div>{term(chr(10).join(c['install']), None, True)}</article></section>""")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claude Mod Garage</title><style>{CSS}</style></head><body>
 <header><h1>Claude Mod <span>Garage</span></h1><p class="lead">Small, independent mods for Claude Code. Pick what you need, install in two commands, and see exactly what each one does before you do.</p>
-<div class="steps"><div class="step"><b>1</b> Add the marketplace (once){term(f"/plugin marketplace add <owner>/{REPO}", None, True)}</div>
+<div class="steps"><div class="step"><b>1</b> Add the marketplace (once){term(f"/plugin marketplace add cloudcruncher/{REPO}", None, True)}</div>
 <div class="step"><b>2</b> Install a mod{term(f"/plugin install agent-radar@{MARKET}", None, True)}</div>
 <div class="step"><b>3</b> Reload and use it{term("/reload-plugins", None, True)}</div></div></header>
 <nav><div>{nav}</div></nav><main>{''.join(body)}</main><footer>MIT licensed · Output samples are illustrative</footer><script>{JS}</script></body></html>"""

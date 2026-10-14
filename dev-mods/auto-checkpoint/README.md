@@ -7,7 +7,7 @@ Snapshots files before the model edits them or runs risky shell commands. `/rewi
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install auto-checkpoint@mod-garage
 ```
 

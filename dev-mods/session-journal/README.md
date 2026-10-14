@@ -7,7 +7,7 @@ Quietly records your prompts, shell commands run and files edited. `/journal` wr
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install session-journal@mod-garage
 ```
 

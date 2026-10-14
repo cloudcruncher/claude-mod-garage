@@ -7,7 +7,7 @@ Shows `5h NN% | ctx NN%` in the status line, toasts once when your 5-hour usage 
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install cost-router@mod-garage
 ```
 

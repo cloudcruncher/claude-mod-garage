@@ -7,7 +7,7 @@ Short `;name` shortcuts in a prompt expand to reusable instructions before Claud
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install prompt-snippets@mod-garage
 ```
 

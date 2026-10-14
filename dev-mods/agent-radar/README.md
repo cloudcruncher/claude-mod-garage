@@ -7,7 +7,7 @@ Opens a pane beside the conversation that updates in real time. It shows the too
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install agent-radar@mod-garage
 ```
 

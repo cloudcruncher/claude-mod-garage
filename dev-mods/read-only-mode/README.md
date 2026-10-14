@@ -7,7 +7,7 @@ Look but don't touch: explore a codebase with edits disabled.
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install read-only-mode@mod-garage
 ```
 

@@ -7,7 +7,7 @@ Refuses to write `.env`, `.pem`, SSH keys and credentials files, refuses command
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install secret-guard@mod-garage
 ```
 

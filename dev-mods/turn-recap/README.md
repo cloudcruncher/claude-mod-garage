@@ -7,7 +7,7 @@ When a turn runs longer than a threshold and used tools, shows a one-line toast 
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install turn-recap@mod-garage
 ```
 

@@ -7,7 +7,7 @@ Toasts at 70% context. At 85% it also adds an instruction telling the model to w
 ## Install
 
 ```
-/plugin marketplace add <owner>/claude-mod-garage
+/plugin marketplace add cloudcruncher/claude-mod-garage
 /plugin install context-guardian@mod-garage
 ```
 
