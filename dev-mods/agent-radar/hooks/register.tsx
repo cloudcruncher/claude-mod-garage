@@ -1,5 +1,5 @@
 import type { Register } from 'claude-code'
-import { clip, filesTouched, finish, fmtDur, label, bar, lastCalls, nextLive, preview, running, sayText, start, type Call, type Live } from './lib'
+import { clip, filesTouched, finish, fmtDur, label, bar, contextHogs, fmtTok, lastCalls, nextLive, preview, running, sayText, start, type Call, type Live } from './lib'
 
 const PANE = 'radar'
 // Engine bookkeeping calls that are noise in a view of what the agents are doing.
@@ -13,6 +13,8 @@ export const register: Register = (on, options) => {
   let liveState: Record<string, Live> = {}
   let turnStart = 0
   let ctxAtTurnStart: number | undefined
+  // What is filling the window; recomputed at most every 3s because it walks the whole transcript.
+  let ctxInfo: { at: number; parts: { name: string; tokens: number }[]; hogs: ReturnType<typeof contextHogs> } | undefined
   let isOpen = false
   const autoOpen = options?.autoOpen === true
 
@@ -93,6 +95,17 @@ export const register: Register = (on, options) => {
     const now = await $.clock.now()
     const agents = await $.agent.list()
     const usage = await $.session.usage().catch(() => undefined)
+    if (!ctxInfo || now - ctxInfo.at > 3000) {
+      const bd = (await $.session.usage({ breakdown: 'summary' }).catch(() => undefined))?.context?.breakdown
+      const msgs = await $.session.messages().catch(() => [])
+      ctxInfo = {
+        at: now,
+        parts: (bd?.categories ?? []).filter(c => c.kind === 'used' && c.tokens > 0).map(c => ({ name: c.name, tokens: c.tokens })),
+        hogs: contextHogs(msgs),
+      }
+    }
+    const hogs = ctxInfo.hogs
+    const hogTotal = hogs.groups.reduce((a, g) => a + g.tokens, 0) || 1
     const live = running(calls)
     const busy = live.length + Object.keys(liveState).length
     const spawned = calls.filter(c => c.tool === 'Agent').length
@@ -109,6 +122,7 @@ export const register: Register = (on, options) => {
       <Box flexDirection="column">
         <Text bold>{busy ? `● working (${live.length} tool${live.length === 1 ? '' : 's'} running)` : '○ idle'}{turnStart ? `  ·  turn ${fmtDur(now - turnStart)}` : ''}  ·  {calls.length} calls{five !== undefined ? `  ·  5h ${Math.round(five)}%` : ''}</Text>
         {ctx !== undefined && <Text color={ctx >= 85 ? 'red' : ctx >= 70 ? 'yellow' : undefined}>ctx {bar(ctx)} {Math.round(ctx)}%{ctxAtTurnStart !== undefined && ctx - ctxAtTurnStart >= 1 ? `  (+${Math.round(ctx - ctxAtTurnStart)}% this turn)` : ''}</Text>}
+        {ctxInfo.parts.length > 0 && <Text wrap="wrap" dimColor>  {ctxInfo.parts.map(p => `${p.name} ${fmtTok(p.tokens)}`).join('  ·  ')}</Text>}
         <Text> </Text>
         <Text bold>Now</Text>
         {Object.entries(liveState).map(([k, l]) => (
@@ -133,6 +147,14 @@ export const register: Register = (on, options) => {
             </Box>
           )
         })}
+        <Text> </Text>
+        <Text bold>Building up in context  (estimate)</Text>
+        {hogs.groups.length === 0 && <Text dimColor>  nothing yet</Text>}
+        {hogs.groups.slice(0, 6).map(g => (
+          <Text wrap="truncate">  {bar((g.tokens / hogTotal) * 100, 8)} {g.name}{g.count > 1 ? ` ×${g.count}` : ''}  {fmtTok(g.tokens)}</Text>
+        ))}
+        {hogs.biggest.length > 0 && <Text dimColor>  biggest:</Text>}
+        {hogs.biggest.map(b => <Text wrap="truncate" dimColor>    {fmtTok(b.tokens)}  {clip(b.name, 90)}</Text>)}
         <Text> </Text>
         <Text bold>Activity</Text>
         {recent.length === 0 && <Text dimColor>  nothing yet</Text>}

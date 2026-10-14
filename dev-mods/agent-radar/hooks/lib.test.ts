@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { clip, filesTouched, finish, fmtDur, label, lastCalls, latestFor, nextLive, bar, preview, running, sayText, start, type Call } from './lib'
+import { clip, filesTouched, finish, fmtDur, label, lastCalls, latestFor, nextLive, bar, contextHogs, fmtTok, preview, running, sayText, start, type Call } from './lib'
 
 const call = (id: string, tool: string, lbl = '', agentId?: string): Call => ({ id, tool, label: lbl, start: 0, agentId })
 
@@ -95,4 +95,24 @@ test('bar fills proportionally and clamps', () => {
   expect(bar(50)).toBe('█████░░░░░')
   expect(bar(150)).toBe('██████████')
   expect(bar(-5)).toBe('░░░░░░░░░░')
+})
+
+test('fmtTok abbreviates thousands', () => {
+  expect(fmtTok(900)).toBe('900')
+  expect(fmtTok(1234)).toBe('1.2k')
+  expect(fmtTok(56789)).toBe('57k')
+})
+
+test('contextHogs ranks tools, prompts and replies by estimated tokens', () => {
+  const big = 'x'.repeat(4000)
+  const r = contextHogs([
+    { role: 'user', text: 'fix it' },
+    { role: 'assistant', text: 'ok', toolUses: [{ tool: 'Read', input: { file_path: 'src/a.ts' }, text: big }, { tool: 'Bash', input: { command: 'ls' }, text: 'a b' }] },
+    { role: 'assistant', text: '', toolUses: [{ tool: 'Read', input: { file_path: 'src/b.ts' }, text: 'small' }] },
+  ])
+  expect(r.groups[0]).toMatchObject({ name: 'Read', count: 2 })
+  expect(r.groups[0].tokens).toBeGreaterThan(1000)
+  expect(r.groups.map(g => g.name)).toEqual(expect.arrayContaining(['You', 'Replies', 'Bash']))
+  expect(r.biggest[0].name).toContain('Read')
+  expect(r.biggest.length).toBe(3)
 })

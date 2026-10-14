@@ -18,11 +18,12 @@ GROUPS = [
 # path: where the mod lives relative to the repo root
 MODS = [
  dict(id="agent-radar", group="watch", path="dev-mods/agent-radar", tagline="A live side window showing what your agents are doing, in parallel.",
-  what="Opens a pane beside the conversation that updates in real time. It shows what each loop is doing right now (thinking, writing its next message, starting a tool call) and the tool running (with a ticking timer) and what the model last said in its visible messages, every subagent with its recent calls and latest message, an activity log with a one-line result under each call, the files edited this session, and in the header a working/idle state, turn time, a context bar that shows how much this turn has added, and 5h usage. Ideal when you fan out several subagents and want to see who is doing what.",
+  what="Opens a pane beside the conversation that updates in real time. It shows what each loop is doing right now (thinking, writing its next message, starting a tool call) and the tool running (with a ticking timer) and what the model last said in its visible messages, every subagent with its recent calls and latest message, an activity log with a one-line result under each call, the files edited this session, and in the header a working/idle state, turn time, a context bar with the window split by category (system prompt, tools, skills, messages) and a ranked list of what is filling the conversation (which tools' results, your prompts, the model's replies, and the biggest single results; token figures there are estimates), and 5h usage. Ideal when you fan out several subagents and want to see who is doing what.",
   activate=["`/radar` opens the pane (Esc closes it).", "Set option `autoOpen` to open it at every session start."],
   options=[("autoOpen", "false", "Open the pane automatically at session start")],
   demo=[("/radar pane", """● working (2 tools running)  ·  turn 1m12s  ·  14 calls  ·  5h 8%
 ctx ███░░░░░░░ 34%  (+6% this turn)
+  System prompt 3.9k  ·  System tools 9.2k  ·  Skills 7.5k  ·  Messages 29k
 
 Now
 ● main writing: “Running the suite before I touch the parser…”  3s
@@ -36,6 +37,14 @@ Agents  (3 spawned)
     ✓ Grep validateToken  1s
     “Token checks live in src/auth.ts and middleware/session.ts.”
 · Plan · outline migration
+
+Building up in context  (estimate)
+  ████████ Read ×6  11k
+  ███░░░░░ Bash ×3  4.1k
+  █░░░░░░░ Replies  1.2k
+  biggest:
+    7.0k  Read src/auth.ts
+    2.5k  Bash npm test
 
 Activity
 ✓ Bash npm test  14s
