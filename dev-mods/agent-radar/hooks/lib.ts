@@ -91,3 +91,24 @@ export function fmtDur(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000))
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m${String(s % 60).padStart(2, '0')}s`
 }
+
+/** What one loop is doing between tool calls, from the model's response stream. */
+export type Live = { phase: 'waiting' | 'thinking' | 'writing' | 'calling'; since: number; text: string; tool?: string }
+
+/** Folds one streamed chunk into a loop's live state. Thinking text is never kept, only the fact of thinking. */
+export function nextLive(prev: Live | undefined, c: { kind: string; text?: string; name?: string }, now: number): Live {
+  const p: Live = prev ?? { phase: 'waiting', since: now, text: '' }
+  if (c.kind === 'text') {
+    if (p.phase !== 'writing') return { phase: 'writing', since: now, text: clip((c.text ?? '').trimStart(), 240) }
+    return { ...p, text: clip((p.text + (c.text ?? '')).slice(-240).trimStart(), 240) }
+  }
+  if (c.kind === 'thinking') return p.phase === 'thinking' ? p : { phase: 'thinking', since: now, text: p.text }
+  if (c.kind === 'tool') return { phase: 'calling', since: now, text: p.text, tool: c.name }
+  return p
+}
+
+/** A fixed-width bar for a percentage, e.g. ███░░░░░░░. */
+export function bar(pct: number, width = 10): string {
+  const n = Math.max(0, Math.min(width, Math.round((pct / 100) * width)))
+  return '█'.repeat(n) + '░'.repeat(width - n)
+}
