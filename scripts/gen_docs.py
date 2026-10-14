@@ -173,11 +173,14 @@ _Illustrative output._
 {demos}{opts_md(m)}{('## Notes' + chr(10) + chr(10) + notes) if notes else ''}"""
 
 def root_readme():
+    COUNT = len(MODS)
     out = [f"""# Claude Mod Garage
 
 A shelf of small, independent mods for [Claude Code](https://claude.com/claude-code). Install only the ones you want. Each has its own README with install steps and a sample of what it looks like.
 
-**See them in action:** open `docs/index.html` in a browser for the visual walkthrough.
+**[Browse the demo site](https://cloudcruncher.github.io/{REPO}/)** for a visual walkthrough of every mod, with copy-paste install commands.
+
+{COUNT} mods in five groups: watch what is happening, stay safe, quality and flow, multi-session, and fun. They are independent: each is its own plugin, installs on its own, and removes cleanly.
 
 ## Quick start
 
@@ -191,9 +194,14 @@ A shelf of small, independent mods for [Claude Code](https://claude.com/claude-c
    ```
 3. Run `/reload-plugins` (or restart). Then use the mod's command (see tables) or just let it work.
 
-Try one without installing: `git clone` this repo, then `claude --plugin-dir ./dev-mods/agent-radar`.
+Try one without installing: `git clone https://github.com/cloudcruncher/{REPO}`, then `claude --plugin-dir ./{REPO}/dev-mods/agent-radar`.
 
-> Requires a Claude Code build that supports plugin hook modules (`hooks/hooks.json` with `"modules"`).
+## Requirements
+
+- A Claude Code build that supports plugin hook modules (`hooks/hooks.json` with a `"modules"` list). If `/plugin install` succeeds but nothing happens, your build is probably too old.
+- The mods are TypeScript hook modules that Claude Code loads itself. There is nothing to compile and no runtime to install.
+- Built and tested on macOS. Side panes dock beside the conversation from about 110 terminal columns; on narrower terminals they may not be shown.
+- `verify-gate` and `git-band` shell out to your own tools (`npm`, `uv`, `make`, `git`). Those need to be on your `PATH`.
 
 ## Pick a mod
 """]
@@ -202,17 +210,48 @@ Try one without installing: `git clone` this repo, then `claude --plugin-dir ./d
         for m in [x for x in MODS if x["group"] == gid]:
             act = m["activate"][0].replace("|", "\\|")
             out.append(f"| [**{m['id']}**]({m['path'] if m['path']!='.' else '.'}/README.md) | {m['tagline']} | {act} |" if m["path"] != "." else f"| **{m['id']}** (repo root) | {m['tagline']} | {act} |")
+    out.append("\n## Mod details\n\nEvery mod in full. Click one to expand.\n")
+    for m in MODS:
+        act = "".join(f"- {a}\n" for a in m["activate"])
+        demos = "\n".join(f"**{l}**\n\n```\n{t}\n```\n" for l, t in m["demo"])
+        notes = "".join(f"- {n}\n" for n in m["notes"])
+        inst = "```\n/plugin install " + m["id"] + "@" + MARKET + "\n```"
+        out.append(f"<details>\n<summary><b>{m['id']}</b>: {m['tagline']}</summary>\n\n{m['what']}\n\n**Install**\n\n{inst}\n\n**Use it**\n\n{act}\n**What you'll see** _(illustrative)_\n\n{demos}{opts_md(m).replace('## Options', '**Options**')}{('**Notes**' + chr(10) + chr(10) + notes) if notes else ''}\n</details>\n")
     c = COMPANION
     out.append(f"""
 ## Companion plugin: {c['name']}
 
-{c['tagline']} It is a separate plugin (Python hooks, agents, skills and commands) that lives in its own folder, `{c['repo']}`, and works well alongside these mods.
+{c['tagline']} It is a separate plugin (Python hooks, agents, skills and commands) that lives in {c['repo']} (not part of this repo) and works well alongside these mods.
 
 | Part | What's in it |
 | --- | --- |""")
     for k, v in c["parts"]: out.append(f"| {k} | {v} |")
     out.append("\nLoad it:\n\n```\n" + "\n".join(c["install"]) + "\n```\n\nIt reads usage numbers saved by a status-line script (see its README), so cost-guard and `/claude-mods:budget` need that set up.")
     out.append(f"""
+## Managing mods
+
+| Task | Command |
+| --- | --- |
+| See what is installed | `/plugin` |
+| Update a mod | `/plugin marketplace update {MARKET}` then `/reload-plugins` |
+| Turn a mod off without removing it | `/plugin disable <name>@{MARKET}` |
+| Remove a mod | `/plugin uninstall <name>@{MARKET}` |
+| Set a mod's options | `/plugin` → pick the mod → configure |
+
+## Safety notes
+
+- `secret-guard` fails closed: if the guard itself errors, the write or git command is blocked. `loop-breaker` fails open so a bug in it never stops your work.
+- `read-only-mode` is a guardrail on the model's tool calls, not a sandbox.
+- `session-journal` and `auto-checkpoint` write inside your project (`.claude/journal/`, checkpoints). Add them to `.gitignore` if you do not want them committed.
+- Nothing in this repo makes network calls of its own, and no mod sends your prompts anywhere.
+
+## Troubleshooting
+
+- **Installed but nothing shows:** run `/reload-plugins`, then `/plugin` and confirm it is enabled.
+- **Pane does not open:** the terminal may be too narrow (panes dock from about 110 columns). Widen it and retry.
+- **Command not found:** the slash command only exists once the mod is enabled and reloaded.
+- **Something looks wrong:** `claude plugin validate <path>` reports problems with a mod's manifest or hooks, and `claude --debug` logs hook failures.
+
 ## Develop
 
 ```
@@ -291,7 +330,7 @@ def page():
     body.append(f"""<section data-g='companion'><h2>Companion plugin: {c['name']}</h2><p class='gd'>{html.escape(c['tagline'])}</p>
 <article class='mod'><ul>{parts}</ul><div class='lbl'>Load it</div>{term(chr(10).join(c['install']), None, True)}</article></section>""")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claude Mod Garage</title><style>{CSS}</style></head><body>
-<header><h1>Claude Mod <span>Garage</span></h1><p class="lead">Small, independent mods for Claude Code. Pick what you need, install in two commands, and see exactly what each one does before you do.</p>
+<header><h1>Claude Mod <span>Garage</span></h1><p class="lead">Small, independent mods for Claude Code. Pick what you need, install in two commands, and see exactly what each one does before you do. <a href="https://github.com/cloudcruncher/{REPO}" style="color:var(--acc2)">View on GitHub</a></p>
 <div class="steps"><div class="step"><b>1</b> Add the marketplace (once){term(f"/plugin marketplace add cloudcruncher/{REPO}", None, True)}</div>
 <div class="step"><b>2</b> Install a mod{term(f"/plugin install agent-radar@{MARKET}", None, True)}</div>
 <div class="step"><b>3</b> Reload and use it{term("/reload-plugins", None, True)}</div></div></header>
@@ -300,13 +339,15 @@ def page():
 def main():
     (ROOT / "README.md").write_text(root_readme())
     for m in MODS:
-        (ROOT / m["path"] / "README.md").write_text(mod_readme(m))
+        if m["path"] != ".":  # the repo root README is root_readme()
+            (ROOT / m["path"] / "README.md").write_text(mod_readme(m))
     (ROOT / "docs").mkdir(exist_ok=True)
     (ROOT / "docs" / "index.html").write_text(page())
     # marketplace files
     plugins = [{"name": m["id"], "source": "./" + m["path"] if m["path"] != "." else "./", "description": m["tagline"]} for m in MODS]
     (ROOT / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": MARKET, "owner": {"name": "Robin Saini"}, "plugins": plugins}, indent=2) + "\n")
     local = [{"name": m["id"], "source": "./" + m["path"].removeprefix("dev-mods/"), "description": m["tagline"]} for m in MODS if m["path"] != "."]
+    local.append({"name": "session-peers", "source": "./session-peers", "description": "Always-on band above the prompt listing every other open Claude Code session."})  # local-only, registered in the author's settings
     (ROOT / "dev-mods" / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "robin-dev-mods", "owner": {"name": "robin"}, "plugins": local}, indent=2) + "\n")
     print("generated", len(MODS), "mods")
 
