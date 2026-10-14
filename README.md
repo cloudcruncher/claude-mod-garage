@@ -679,27 +679,6 @@ Tiny text-mode games that run inside Claude Code. /doom is a raycaster with wand
 </details>
 
 
-## Companion plugin: claude-mods
-
-Cost-aware agent team: tier router, swarm conductor, cost guard, notifications and output styles. It is a separate plugin (Python hooks, agents, skills and commands) that lives in /path/to/claude-mods (not part of this repo) and works well alongside these mods.
-
-| Part | What's in it |
-| --- | --- |
-| Agents | `scout` (Haiku, read-only: search and triage), `builder` (Sonnet: implementation), `reviewer` (Opus, read-only: review and security), `planner`, `integrator` (merges parallel worktrees). |
-| Skills | `claude-mods:route` picks the cheapest adequate model tier and delegates; `claude-mods:swarm` runs a tiered agent team with quality gates and a live board. |
-| Commands | `/claude-mods:tier <task>` recommends a model tier; `/claude-mods:budget` shows context, 5h usage, cost and cache warmth; `/claude-mods:swarm` runs the swarm; `/claude-mods:audit` checks whether your CLAUDE.md rules are still needed. |
-| Hooks | cost-guard (warns at 70% context or 80% 5h usage), notify (macOS notification after long turns), resume-recap (handoff note between sessions), cache-keeper (cache warmth for a status line). |
-| Output styles | `terse` and `mentor`, selected with `/output-style`. |
-
-Load it:
-
-```
-claude --plugin-dir /path/to/claude-mods
-# or keep it permanently: alias cc='claude --plugin-dir /path/to/claude-mods'
-```
-
-It reads usage numbers saved by a status-line script (see its README), so cost-guard and `/claude-mods:budget` need that set up.
-
 ## Managing mods
 
 | Task | Command |

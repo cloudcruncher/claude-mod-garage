@@ -124,16 +124,6 @@ Files touched
   notes=["Doom needs a pane of at least 40x16; 80x30 or larger looks best.", "Keys only reach a game while its pane has focus. Esc closes it.", "Key presses move in steps (terminals give no key-up), so tap rather than hold."]),
 ]
 
-COMPANION = dict(name="claude-mods", repo="/path/to/claude-mods", tagline="Cost-aware agent team: tier router, swarm conductor, cost guard, notifications and output styles.",
-  parts=[
-   ("Agents", "`scout` (Haiku, read-only: search and triage), `builder` (Sonnet: implementation), `reviewer` (Opus, read-only: review and security), `planner`, `integrator` (merges parallel worktrees)."),
-   ("Skills", "`claude-mods:route` picks the cheapest adequate model tier and delegates; `claude-mods:swarm` runs a tiered agent team with quality gates and a live board."),
-   ("Commands", "`/claude-mods:tier <task>` recommends a model tier; `/claude-mods:budget` shows context, 5h usage, cost and cache warmth; `/claude-mods:swarm` runs the swarm; `/claude-mods:audit` checks whether your CLAUDE.md rules are still needed."),
-   ("Hooks", "cost-guard (warns at 70% context or 80% 5h usage), notify (macOS notification after long turns), resume-recap (handoff note between sessions), cache-keeper (cache warmth for a status line)."),
-   ("Output styles", "`terse` and `mentor`, selected with `/output-style`."),
-  ],
-  install=["claude --plugin-dir /path/to/claude-mods", "# or keep it permanently: alias cc='claude --plugin-dir /path/to/claude-mods'"])
-
 def opts_md(m):
     if not m["options"]: return ""
     rows = "\n".join(f"| `{n}` | {d} | {x} |" for n, d, x in m["options"])
@@ -217,16 +207,6 @@ Try one without installing: `git clone https://github.com/cloudcruncher/{REPO}`,
         notes = "".join(f"- {n}\n" for n in m["notes"])
         inst = "```\n/plugin install " + m["id"] + "@" + MARKET + "\n```"
         out.append(f"<details>\n<summary><b>{m['id']}</b>: {m['tagline']}</summary>\n\n{m['what']}\n\n**Install**\n\n{inst}\n\n**Use it**\n\n{act}\n**What you'll see** _(illustrative)_\n\n{demos}{opts_md(m).replace('## Options', '**Options**')}{('**Notes**' + chr(10) + chr(10) + notes) if notes else ''}\n</details>\n")
-    c = COMPANION
-    out.append(f"""
-## Companion plugin: {c['name']}
-
-{c['tagline']} It is a separate plugin (Python hooks, agents, skills and commands) that lives in {c['repo']} (not part of this repo) and works well alongside these mods.
-
-| Part | What's in it |
-| --- | --- |""")
-    for k, v in c["parts"]: out.append(f"| {k} | {v} |")
-    out.append("\nLoad it:\n\n```\n" + "\n".join(c["install"]) + "\n```\n\nIt reads usage numbers saved by a status-line script (see its README), so cost-guard and `/claude-mods:budget` need that set up.")
     out.append(f"""
 ## Managing mods
 
@@ -310,7 +290,7 @@ def term(text, cap=None, copy=False):
     return f"<div class='term'>{btn}{c}{html.escape(text)}</div>"
 
 def page():
-    nav = "<button class='on' data-f='all'>All</button>" + "".join(f"<button data-f='{g}'>{html.escape(n)}</button>" for g, n, _ in GROUPS) + "<button data-f='companion'>claude-mods</button>"
+    nav = "<button class='on' data-f='all'>All</button>" + "".join(f"<button data-f='{g}'>{html.escape(n)}</button>" for g, n, _ in GROUPS)
     body = []
     for gid, gname, gdesc in GROUPS:
         body.append(f"<section data-g='{gid}'><h2>{html.escape(gname)}</h2><p class='gd'>{html.escape(gdesc)}</p>")
@@ -325,10 +305,6 @@ def page():
 <div class='lbl'>What you'll see (illustrative)</div>{demos}
 {('<div class="lbl">Options</div><ul>' + opts + '</ul>') if opts else ''}{('<div class="lbl">Notes</div><ul>' + notes + '</ul>') if notes else ''}</article>""")
         body.append("</section>")
-    c = COMPANION
-    parts = "".join(f"<li><b>{html.escape(k)}</b>: {inline(v)}</li>" for k, v in c["parts"])
-    body.append(f"""<section data-g='companion'><h2>Companion plugin: {c['name']}</h2><p class='gd'>{html.escape(c['tagline'])}</p>
-<article class='mod'><ul>{parts}</ul><div class='lbl'>Load it</div>{term(chr(10).join(c['install']), None, True)}</article></section>""")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claude Mod Garage</title><style>{CSS}</style></head><body>
 <header><h1>Claude Mod <span>Garage</span></h1><p class="lead">Small, independent mods for Claude Code. Pick what you need, install in two commands, and see exactly what each one does before you do. <a href="https://github.com/cloudcruncher/{REPO}" style="color:var(--acc2)">View on GitHub</a></p>
 <div class="steps"><div class="step"><b>1</b> Add the marketplace (once){term(f"/plugin marketplace add cloudcruncher/{REPO}", None, True)}</div>
