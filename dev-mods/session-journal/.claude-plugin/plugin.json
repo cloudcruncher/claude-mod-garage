@@ -1,5 +1,9 @@
 {
   "name": "session-journal",
   "version": "0.1.0",
-  "description": "/journal writes a markdown timeline of the session (your prompts, commands run, files edited) to .claude/journal/ so you can review or share what happened."
+  "description": "/journal writes a markdown timeline of the session (your prompts, commands run, files edited) to .claude/journal/ so you can review or share what happened.",
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }

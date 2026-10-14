@@ -1,5 +1,9 @@
 {
   "name": "arcade",
   "version": "0.1.0",
-  "description": "Tiny text-mode games in a pane: /doom (raycaster with wandering enemies) and /snake."
+  "description": "Tiny text-mode games in a pane: /doom (raycaster with wandering enemies) and /snake.",
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }

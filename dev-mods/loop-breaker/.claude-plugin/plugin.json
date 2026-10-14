@@ -9,5 +9,9 @@
       "description": "The call after this many identical ones is refused",
       "default": 3
     }
-  }
+  },
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
 }

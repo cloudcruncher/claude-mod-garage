@@ -1,1 +1,9 @@
-{"name":"cost-router","version":"0.1.0","description":"Status line with 5h usage and context %, toasts at 70/85% usage, and keyword-based model choice for unpinned subagents."}
+{
+  "name": "cost-router",
+  "version": "0.1.0",
+  "description": "Status line with 5h usage and context %, toasts at 70/85% usage, and keyword-based model choice for unpinned subagents.",
+  "author": {
+    "name": "Robin Saini"
+  },
+  "license": "MIT"
+}
