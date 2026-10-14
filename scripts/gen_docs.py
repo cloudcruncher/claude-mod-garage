@@ -21,7 +21,7 @@ MODS = [
   what="Opens a pane beside the conversation that updates in real time: which tools are running right now, every subagent with its task and current tool, a scrolling activity log with elapsed times, and the files edited this session. Ideal when you fan out several subagents and want to see who is doing what.",
   activate=["`/radar` opens the pane (Esc closes it).", "Set option `autoOpen` to open it at every session start."],
   options=[("autoOpen", "false", "Open the pane automatically at session start")],
-  demo=[("/radar pane", """● 2 running  ·  14 calls  ·  2/3 agents active
+  demo=[("/radar pane", """● 2 running  ·  14 calls  ·  2 agents active  ·  3 spawned
 
 Agents
 ▶ Explore · map auth flow  → Grep validateToken

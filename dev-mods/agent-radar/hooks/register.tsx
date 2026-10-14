@@ -2,6 +2,8 @@ import type { Register } from 'claude-code'
 import { filesTouched, finish, fmtDur, label, latestFor, running, start, type Call } from './lib'
 
 const PANE = 'radar'
+// Engine bookkeeping calls that are noise in a view of what the agents are doing.
+const INTERNAL = new Set(['SubagentHandback'])
 
 export const register: Register = (on, options) => {
   let calls: Call[] = []
@@ -23,6 +25,7 @@ export const register: Register = (on, options) => {
   })
 
   on('tool.call', async ($, e, next) => {
+    if (INTERNAL.has(e.tool)) return next(e)
     const now = await $.clock.now()
     const args = e as unknown as Record<string, unknown>
     calls = start(calls, { id: e.tool_use_id, agentId: e.agentId, tool: e.tool, label: label(e.tool, args), start: now })
@@ -38,6 +41,7 @@ export const register: Register = (on, options) => {
     const now = await $.clock.now()
     const agents = await $.agent.list()
     const live = running(calls)
+    const spawned = calls.filter(c => c.tool === 'Agent').length
     const rows = Math.max(6, (e.viewport?.rows ?? 30) - 4)
     const recent = calls.slice(-Math.max(5, Math.floor(rows / 2))).reverse()
     const files = filesTouched(calls).slice(0, 5)
@@ -46,10 +50,10 @@ export const register: Register = (on, options) => {
 
     return (
       <Box flexDirection="column">
-        <Text bold>{live.length ? `● ${live.length} running` : '○ idle'}  ·  {calls.length} calls  ·  {agents.filter(a => a.status === 'running').length}/{agents.length} agents active</Text>
+        <Text bold>{live.length ? `● ${live.length} running` : '○ idle'}  ·  {calls.length} calls  ·  {agents.filter(a => a.status === 'running').length} agents active  ·  {spawned} spawned</Text>
         <Text> </Text>
         <Text bold>Agents</Text>
-        {agents.length === 0 && <Text dimColor>  none spawned</Text>}
+        {agents.length === 0 && <Text dimColor>  {spawned ? `${spawned} finished, none running` : 'none spawned'}</Text>}
         {agents.slice(-6).map(a => {
           const last = latestFor(calls, a.id)
           return (

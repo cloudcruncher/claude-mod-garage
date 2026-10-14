@@ -8,6 +8,11 @@ test('signature ignores ids and key order', () => {
   expect(signature('Bash', { command: 'pwd' })).not.toBe(a)
 })
 
+test('signature ignores the changing description', () => {
+  expect(signature('Bash', { command: 'echo hi', description: 'Print hi (1/5)' }))
+    .toBe(signature('Bash', { command: 'echo hi', description: 'Print hi again (2/5)', timeout: 5000 }))
+})
+
 test('streak counts only the trailing identical calls', () => {
   expect(streak(['a', 'b', 'b', 'b'], 'b')).toBe(3)
   expect(streak(['b', 'b', 'a'], 'b')).toBe(0)

@@ -25,7 +25,7 @@ _Illustrative output._
 **/radar pane**
 
 ```
-● 2 running  ·  14 calls  ·  2/3 agents active
+● 2 running  ·  14 calls  ·  2 agents active  ·  3 spawned
 
 Agents
 ▶ Explore · map auth flow  → Grep validateToken

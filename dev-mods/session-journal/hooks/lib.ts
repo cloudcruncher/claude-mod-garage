@@ -26,7 +26,7 @@ export function add(list: Entry[], entry: Entry): Entry[] {
 const hhmm = (ms: number) => new Date(ms).toISOString().slice(11, 16)
 
 export function render(entries: Entry[], title: string): string {
-  const lines = [`# ${title}`, '']
+  const lines = [`# ${title} (UTC)`]
   const files = new Map<string, number>()
   for (const e of entries) {
     if (e.kind === 'prompt') lines.push('', `## ${hhmm(e.at)} · ${clip(e.text, 120)}`, '')
