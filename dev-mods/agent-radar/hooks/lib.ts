@@ -112,3 +112,38 @@ export function bar(pct: number, width = 10): string {
   const n = Math.max(0, Math.min(width, Math.round((pct / 100) * width)))
   return '█'.repeat(n) + '░'.repeat(width - n)
 }
+
+/** 1234 -> 1.2k, 56789 -> 57k. */
+export function fmtTok(n: number): string {
+  if (n < 1000) return String(Math.round(n))
+  return n < 10000 ? `${(n / 1000).toFixed(1)}k` : `${Math.round(n / 1000)}k`
+}
+
+export type Hog = { name: string; tokens: number; count: number }
+type Msg = { role: string; text?: string; toolUses?: { tool: string; input?: Record<string, unknown>; text?: string }[] }
+
+/**
+ * Where the conversation's tokens are going, estimated at four characters a token:
+ * your prompts, the model's replies, and each tool's calls plus results, largest first;
+ * and the three single biggest tool results.
+ */
+export function contextHogs(messages: readonly Msg[]): { groups: Hog[]; biggest: { name: string; tokens: number }[] } {
+  const by = new Map<string, Hog>()
+  const add = (name: string, chars: number) => {
+    const h = by.get(name) ?? { name, tokens: 0, count: 0 }
+    by.set(name, { name, tokens: h.tokens + chars / 4, count: h.count + 1 })
+  }
+  const singles: { name: string; tokens: number }[] = []
+  for (const m of messages) {
+    if (m.text) add(m.role === 'user' ? 'You' : 'Replies', m.text.length)
+    for (const u of m.toolUses ?? []) {
+      const chars = JSON.stringify(u.input ?? {}).length + (u.text?.length ?? 0)
+      add(u.tool, chars)
+      singles.push({ name: `${u.tool} ${label(u.tool, (u.input ?? {}) as Record<string, unknown>)}`, tokens: chars / 4 })
+    }
+  }
+  return {
+    groups: [...by.values()].map(h => ({ ...h, tokens: Math.round(h.tokens) })).sort((a, b) => b.tokens - a.tokens),
+    biggest: singles.sort((a, b) => b.tokens - a.tokens).slice(0, 3).map(x => ({ ...x, tokens: Math.round(x.tokens) })),
+  }
+}
