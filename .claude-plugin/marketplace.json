@@ -1,5 +1,6 @@
 {
   "name": "mod-garage",
+  "description": "Small, independent mods for Claude Code: watch agents, stay safe, verify work, work across sessions.",
   "owner": {
     "name": "Robin Saini"
   },

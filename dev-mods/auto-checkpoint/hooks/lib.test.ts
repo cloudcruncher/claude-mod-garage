@@ -1,7 +1,7 @@
 import { test, expect } from 'claude-code/testing'
 import {
   filePathsFor, riskyBash, absolutePath, buildManifest, pruneList, checkpointId,
-  resolveSelection, formatListing, parseManifest,
+  resolveSelection, formatListing, parseManifest, skipReason, MAX_SNAPSHOT_KB,
 } from './lib.ts'
 
 test('filePathsFor picks the right key per tool', () => {
@@ -21,6 +21,23 @@ test('riskyBash flags destructive commands only', () => {
   expect(riskyBash('ls -la')).toBeUndefined()
   expect(riskyBash('git status')).toBeUndefined()
   expect(riskyBash('git checkout main')).toBeUndefined()
+})
+
+test('riskyBash covers checkout ., stash and clean', () => {
+  expect(riskyBash('git checkout .')).toEqual({ paths: [], wholeTree: true })
+  expect(riskyBash('git stash')?.wholeTree).toBe(true)
+  expect(riskyBash('git stash -u')?.wholeTree).toBe(true)
+  expect(riskyBash('git stash list')).toBeUndefined()
+  expect(riskyBash('git clean -fd')).toEqual({ paths: [], wholeTree: false, unsnapshotted: true })
+  expect(riskyBash('git clean -n')?.unsnapshotted).toBeUndefined()
+})
+
+test('skipReason skips huge paths, node_modules and .git', () => {
+  expect(skipReason('/p/src/a.ts', 4)).toBeUndefined()
+  expect(skipReason('/p/src/a.ts', undefined)).toBeUndefined()
+  expect(skipReason('/p/data', MAX_SNAPSHOT_KB + 1)).toMatch(/larger than/)
+  expect(skipReason('/p/node_modules', 1)).toMatch(/node_modules/)
+  expect(skipReason('/p/.git/config', 1)).toMatch(/\.git/)
 })
 
 test('absolutePath resolves relative, home and dotdot', () => {

@@ -2,6 +2,14 @@
   "name": "secret-guard",
   "version": "0.1.0",
   "description": "Denies writing secret files, committing secrets, and pushing to main or force pushing.",
+  "userConfig": {
+    "blockMainPush": {
+      "type": "boolean",
+      "title": "Always block pushes to main or master",
+      "description": "On: git push to main or master is refused. Off: allowed (force pushes stay blocked)",
+      "default": true
+    }
+  },
   "author": {
     "name": "Robin Saini"
   },

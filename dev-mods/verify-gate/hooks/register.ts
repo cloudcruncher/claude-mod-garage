@@ -1,6 +1,6 @@
 import type { Register, EngineInterface } from 'claude-code'
 import {
-  MAX_RETRIES, detectChecks, isCodeEdit, failureMessage, projectName, winsLine,
+  MAX_RETRIES, detectChecks, isCodeEdit, failureMessage,
   type CheckResult, type ProjectFiles,
 } from './lib.ts'
 
@@ -22,16 +22,13 @@ async function loadProject($: Engine, cwd: string): Promise<ProjectFiles> {
   const files: ProjectFiles = { names }
   if (names.includes('package.json')) files.packageJson = await readIfThere($, `${cwd}/package.json`)
   if (names.includes('pyproject.toml')) files.pyproject = await readIfThere($, `${cwd}/pyproject.toml`)
+  const reqNames = names.filter(n => n === 'requirements.txt' || n === 'requirements-dev.txt')
+  if (reqNames.length > 0) {
+    files.requirements = (await Promise.all(reqNames.map(n => readIfThere($, `${cwd}/${n}`)))).join('\n')
+  }
   const make = names.find(n => n === 'Makefile' || n === 'makefile' || n === 'GNUmakefile')
   if (make) files.makefile = await readIfThere($, `${cwd}/${make}`)
   return files
-}
-
-async function appendWin($: Engine, line: string): Promise<void> {
-  const home = (await $.env.get('HOME')) ?? ''
-  const path = `${home}/.claude/state/wins.md`
-  const old = (await readIfThere($, path)) ?? ''
-  await $.fs.write(path, `${old}${old === '' || old.endsWith('\n') ? '' : '\n'}${line}\n`)
 }
 
 export const register: Register = on => {
@@ -62,7 +59,7 @@ export const register: Register = on => {
     const results: CheckResult[] = []
     for (const check of checks) {
       try {
-        const r = await $.process.run(check.argv, { cwd, timeoutMs: 180000 })
+        const r = await $.process.run(check.argv, { cwd, timeoutMs: 180000, env: { CI: '1' } })
         results.push({ check, exitCode: r.exitCode, output: `${r.stdout}${r.stderr}`.trim() })
       } catch (err) {
         results.push({ check, exitCode: 1, output: `could not run: ${String(err)}` })
@@ -72,10 +69,7 @@ export const register: Register = on => {
     if (results.every(r => r.exitCode === 0)) {
       hasEdits = false
       retries = 0
-      const passed = results.map(r => r.check.name)
       $.ui.toast('verified')
-      const now = await $.clock.now()
-      await appendWin($, winsLine(new Date(now).toISOString(), projectName(cwd), passed)).catch(() => undefined)
       return base
     }
 

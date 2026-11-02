@@ -2,7 +2,7 @@
 
 Cuts off a model that keeps repeating the same tool call.
 
-If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls. If the hook errors it fails open.
+If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls, and the count starts again each turn. If the hook errors it fails open.
 
 ## Install
 
@@ -37,6 +37,7 @@ loop-breaker: refused a Bash call repeated 4 times
 
 | Option | Default | What it does |
 | --- | --- | --- |
-| `maxRepeats` | 3 | Identical calls allowed in a row |
+| `maxRepeats` | 3 | Identical calls allowed in a row (a positive whole number; anything else uses 3) |
+| `allowlist` | TaskOutput,BashOutput,gh run view,git status | Comma-separated tool names or Bash command prefixes that may repeat, such as polling calls |
 
 Set options when installing, or later in `/plugin` → the mod → configure.

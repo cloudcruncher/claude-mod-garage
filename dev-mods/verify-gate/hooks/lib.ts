@@ -16,6 +16,8 @@ export type ProjectFiles = {
   names: string[]
   packageJson?: string
   pyproject?: string
+  /** requirements.txt and requirements-dev.txt, concatenated */
+  requirements?: string
   makefile?: string
 }
 
@@ -63,9 +65,11 @@ function detectNode(files: ProjectFiles): Check[] {
 function detectPython(files: ProjectFiles): Check[] {
   const py = files.pyproject
   if (py === undefined) return []
+  const reqs = files.requirements ?? ''
   const out: Check[] = []
   const mentions = (word: string): boolean => new RegExp(`\\b${word}\\b`, 'i').test(py)
-  if (/\[tool\.pytest/.test(py) || mentions('pytest') || files.names.includes('tests')) {
+  // pytest only when the project declares it, not merely because a tests/ folder exists
+  if (/\[tool\.pytest/.test(py) || mentions('pytest') || /^\s*pytest\b/im.test(reqs)) {
     out.push({ name: 'pytest', argv: ['uv', 'run', 'pytest', '-q', '-x'] })
   }
   if (/\[tool\.ruff/.test(py) || mentions('ruff')) {
@@ -103,10 +107,6 @@ export function failureMessage(results: CheckResult[], attempt: number): string 
     .map(r => `$ ${r.check.argv.join(' ')}   (exit ${r.exitCode})\n${tailOutput(r.output)}`)
     .join('\n\n')
   return `verify-gate: ${failed.length} check(s) failed after your edits (attempt ${attempt} of ${MAX_RETRIES}). Fix the problems below, then finish again.\n\n${body}`
-}
-
-export function winsLine(dateIso: string, projectDir: string, passed: string[]): string {
-  return `${dateIso.slice(0, 10)} | ${projectDir} | ${passed.join(', ')}`
 }
 
 export function projectName(cwd: string): string {

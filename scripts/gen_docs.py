@@ -74,13 +74,13 @@ Files touched
   demo=[("Status line", "5h 62% | ctx 34%"), ("Toast", "5h usage passed 70% (now 71%)")],
   notes=["With no subscription rate-limit data, values show as `n/a` and no toasts fire."]),
  dict(id="secret-guard", group="protect", path="dev-mods/secret-guard", tagline="Stops secrets being written, committed or pushed.",
-  what="Refuses to write `.env`, `.pem`, SSH keys and credentials files, refuses commands that contain API keys or high-entropy tokens, blocks `git add`/`commit` of staged secrets, and blocks pushes to main/master and force pushes. `.env.example`-style files are allowed.",
-  activate=["Automatic once installed."], options=[],
+  what="Refuses to write `.env`, `.pem`, SSH keys and credentials files, refuses to write file content that looks like an API key or token, refuses commands that contain API keys or high-entropy tokens, blocks `git add`/`commit` of staged secrets, and blocks force pushes and (by default) pushes to main/master. Git commands are checked in the directory they run in, including `cd <dir> &&` and `git -C <dir>`. `.env.example`-style files are allowed.",
+  activate=["Automatic once installed."], options=[("blockMainPush", "on", "Refuse every git push to main or master (force pushes are always refused)")],
   demo=[("Model tries to write .env", "secret-guard: refusing to write .env. .env is an environment file that usually holds secrets. Use a .env.example with placeholder values, or ask the user to edit it."), ("Model tries to push", "secret-guard: git push blocked: pushing to main is not allowed.")],
   notes=["Fails closed: if the guard itself errors, the write or git command is blocked."]),
  dict(id="loop-breaker", group="protect", path="dev-mods/loop-breaker", tagline="Cuts off a model that keeps repeating the same tool call.",
-  what="If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls. If the hook errors it fails open.",
-  activate=["Automatic once installed."], options=[("maxRepeats", "3", "Identical calls allowed in a row")],
+  what="If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls, and the count starts again each turn. If the hook errors it fails open.",
+  activate=["Automatic once installed."], options=[("maxRepeats", "3", "Identical calls allowed in a row (a positive whole number; anything else uses 3)"), ("allowlist", "TaskOutput,BashOutput,gh run view,git status", "Comma-separated tool names or Bash command prefixes that may repeat, such as polling calls")],
   demo=[("Fourth identical call", "This exact Bash call has already run 3 times in a row with the same arguments. Repeating it will not change the result. Re-read the output, change the arguments, or try a different approach."), ("Toast", "loop-breaker: refused a Bash call repeated 4 times")], notes=[]),
  dict(id="read-only-mode", group="protect", path="dev-mods/read-only-mode", tagline="Look but don't touch: explore a codebase with edits disabled.",
   what="`/readonly on` refuses every file edit and every shell command that is not clearly read-only (ls, cat, grep, git status/log/diff, find without -delete...). Redirects, command substitution and unknown commands are refused. Great for onboarding to unfamiliar code or inspecting a production checkout.",
@@ -88,15 +88,15 @@ Files touched
   demo=[("Enable", "> /readonly on\nRead-only mode ON: edits and mutating commands are refused."), ("Model tries to edit", "Read-only mode is on (the user ran /readonly on). Do not edit files; describe the change instead."), ("Status line", "🔒 read-only")],
   notes=["It is a guardrail on the model's tool calls, not a sandbox: it does not stop you from running commands yourself."]),
  dict(id="auto-checkpoint", group="protect", path="dev-mods/auto-checkpoint", tagline="Automatic snapshots before edits, so any change is undoable.",
-  what="Snapshots files before the model edits them or runs risky shell commands. `/rewind-to` lists the checkpoints and restores one.",
-  activate=["Snapshots are automatic.", "`/rewind-to list` shows checkpoints; `/rewind-to 2` restores checkpoint 2."], options=[],
-  demo=[("/rewind-to list", "1  14:02  Edit src/auth.ts\n2  14:05  Edit src/auth.ts\n3  14:09  Bash git checkout -- ."), ("/rewind-to 2", "Rewound to checkpoint 2:\nrestored src/auth.ts")], notes=["Output format shown is illustrative."]),
+  what="Snapshots files before the model edits them or runs risky shell commands (rm, mv, git reset --hard, git checkout ., git stash, git clean). `/rewind-to` lists the checkpoints and restores one. Files over 50MB, node_modules and .git are skipped and the skip is logged; `git clean` deletes untracked files, which cannot be snapshotted, so you get a warning instead.",
+  activate=["Snapshots are automatic.", "`/rewind-to` shows checkpoints; `/rewind-to 2` restores checkpoint 2; `/rewind-to last` restores the newest."], options=[],
+  demo=[("/rewind-to", "1  14:02  Edit src/auth.ts\n2  14:05  Edit src/auth.ts\n3  14:09  Bash git checkout -- ."), ("/rewind-to 2", "Rewound to checkpoint 2:\nrestored src/auth.ts")], notes=["Output format shown is illustrative.", "Privacy: checkpoints are full copies of the files you edit or delete, stored in `~/.claude/checkpoints/<session>/` (not in your project). That includes `.env` and other secret files if they are touched. The newest 200 checkpoints are kept; delete the folder to clear them."]),
  dict(id="context-guardian", group="protect", path="dev-mods/context-guardian", tagline="Warns before the context window fills up.",
   what="Toasts at 70% context. At 85% it also adds an instruction telling the model to wrap up the current step and run `/compact`, keeping the task, changed files, failing output, decisions and branch state.",
   activate=["Automatic once installed."], options=[],
   demo=[("At 70%", "Context is 70% full. Consider /compact or delegating."), ("At 85% (sent to the model)", "Context is nearly full (85% or more). Wrap up the current step, then run /compact.")], notes=["Toast wording is illustrative."]),
  dict(id="verify-gate", group="flow", path="dev-mods/verify-gate", tagline="Runs your tests, lint and type-check after edits, and feeds failures back.",
-  what="After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Docs, images and config edits are ignored.",
+  what="After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest only when declared in pyproject.toml or requirements, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Checks run with `CI=1` so test runners do not start watch mode. Docs, images and config edits are ignored.",
   activate=["Automatic once installed. Needs a recognisable project (package.json, pyproject.toml or Makefile)."], options=[],
   demo=[("All green", "verified"), ("Gives up", "verify-gate: still failing after 3 retries, giving up this turn")], notes=[]),
  dict(id="prompt-snippets", group="flow", path="dev-mods/prompt-snippets", tagline="Type ;review or ;tests and it expands into a full instruction.",
@@ -119,9 +119,9 @@ Files touched
 
 - `src/auth.ts` (×1)""")], notes=["Add `.claude/journal/` to .gitignore if you don't want to commit journals.", "Records are kept in memory (last 1000 entries), so a restart starts a fresh journal."]),
  dict(id="session-deck", group="sessions", path=".", tagline="See and message your other live Claude sessions.",
-  what="Keeps a shared roster of your running sessions (project, model, one-line AI summary of what each is doing). `/live` opens a pane with the roster, usage bars and a small pet; `/peers` lists other sessions; `/tell` sends one a message. Also asks before risky shell commands (force-delete, force-push, publishing) and chimes after turns longer than 30s.",
-  activate=["`/live` opens the pane, `/peers` lists sessions, `/tell <id-prefix> <text>` messages one.", "The risky-command prompt and the chime are automatic."], options=[],
-  demo=[("/peers", "a1b2c3d4  sonnet  /work/api   fixing token refresh bug\n9f8e7d6c  opus    /work/web   reviewing checkout redesign"), ("/tell 9f8e Please rebase on main", "Sent to 9f8e7d6c"), ("Risky command prompt", "DESTRUCTIVE: force/recursive delete | run it? rm -rf src\n  [Run it]  [Refuse]")],
+  what="Keeps a shared roster of your running sessions (project, model, one-line AI summary of what each is doing, made by sending your last few messages to the haiku model after each turn; switch it off with the `sessionSummary` option). `/live` opens a pane with the roster, usage bars and a small pet; `/sessions` lists other sessions; `/tell` sends one a message. Also asks before risky shell commands (force-delete, force-push, publishing) and chimes after turns longer than 30s.",
+  activate=["`/live` opens the pane, `/sessions` lists sessions, `/tell <id-prefix> <text>` messages one.", "The risky-command prompt and the chime are automatic."], options=[("sessionSummary", "on", "After each turn, send the last few messages to the haiku model for a one-line summary. Off: no summary and nothing extra sent")],
+  demo=[("/sessions", "a1b2c3d4  sonnet  /work/api   fixing token refresh bug\n9f8e7d6c  opus    /work/web   reviewing checkout redesign"), ("/tell 9f8e Please rebase on main", "Sent to 9f8e7d6c"), ("Risky command prompt", "DESTRUCTIVE: force/recursive delete | run it? rm -rf src\n  [Run it]  [Refuse]")],
   notes=["Sessions only see each other on the same machine and user.", "Install name: `session-deck` (the repo root is itself a plugin)."]),
  dict(id="break-time", group="fun", path="dev-mods/break-time", tagline="A coffee-break reminder with an animated pane.",
   what="Tracks active time and, after a while, toasts and opens an animated ASCII coffee-break pane with a countdown and stretch tips.",
@@ -201,6 +201,7 @@ Try one without installing: `git clone https://github.com/cloudcruncher/{REPO}`,
 
 - A Claude Code build that supports plugin hook modules (`hooks/hooks.json` with a `"modules"` list). If `/plugin install` succeeds but nothing happens, your build is probably too old.
 - The mods are TypeScript hook modules that Claude Code loads itself. There is nothing to compile and no runtime to install.
+- Tested with Claude Code 2.1.316. Older builds may lack hook-module support.
 - Built and tested on macOS. Side panes dock beside the conversation from about 110 terminal columns; on narrower terminals they may not be shown.
 - `verify-gate` and `git-band` shell out to your own tools (`npm`, `uv`, `make`, `git`). Those need to be on your `PATH`.
 
@@ -233,8 +234,9 @@ Try one without installing: `git clone https://github.com/cloudcruncher/{REPO}`,
 
 - `secret-guard` fails closed: if the guard itself errors, the write or git command is blocked. `loop-breaker` fails open so a bug in it never stops your work.
 - `read-only-mode` is a guardrail on the model's tool calls, not a sandbox.
-- `session-journal` and `auto-checkpoint` write inside your project (`.claude/journal/`, checkpoints). Add them to `.gitignore` if you do not want them committed.
-- Nothing in this repo makes network calls of its own, and no mod sends your prompts anywhere.
+- `session-journal` writes inside your project (`.claude/journal/`); add it to `.gitignore` if you do not want it committed. `auto-checkpoint` stores full copies of edited files, `.env` included, in `~/.claude/checkpoints/` outside your project; delete that folder to clear them.
+- Nothing in this repo makes its own network calls. One mod does send data to the model provider: `session-deck` sends your last few messages to the haiku model after each turn to write a one-line session summary (your Claude Code account, same as normal use). Turn it off with its `sessionSummary` option. No other mod sends your prompts anywhere.
+- Tests: run `claude plugin test dev-mods/<mod>` for each mod. `claude plugin test .` at the repo root also runs every nested mod's tests with the root session-deck module loaded underneath them; 7 of those nested tests fail only because of that (they do not stub the root module's calls), so test the mods individually. The root module's own tests are in `tests/` and pass there.
 
 ## Troubleshooting
 
@@ -332,10 +334,7 @@ def main():
     (ROOT / "docs" / "index.html").write_text(page())
     # marketplace files
     plugins = [{"name": m["id"], "source": "./" + m["path"] if m["path"] != "." else "./", "description": m["tagline"]} for m in MODS]
-    (ROOT / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": MARKET, "owner": {"name": "Robin Saini"}, "plugins": plugins}, indent=2) + "\n")
-    local = [{"name": m["id"], "source": "./" + m["path"].removeprefix("dev-mods/"), "description": m["tagline"]} for m in MODS if m["path"] != "."]
-    local.append({"name": "session-peers", "source": "./session-peers", "description": "Always-on band above the prompt listing every other open Claude Code session."})  # local-only, registered in the author's settings
-    (ROOT / "dev-mods" / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "robin-dev-mods", "owner": {"name": "robin"}, "plugins": local}, indent=2) + "\n")
+    (ROOT / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": MARKET, "description": "Small, independent mods for Claude Code: watch agents, stay safe, verify work, work across sessions.", "owner": {"name": "Robin Saini"}, "plugins": plugins}, indent=2) + "\n")
     print("generated", len(MODS), "mods")
 
 main()

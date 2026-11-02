@@ -33,13 +33,13 @@ test('safe command passes without question', async ($, on) => {
   expect(out.result).toBe('ran')
 })
 
-test('/peers lists other sessions and /tell delivers', async ($, on) => {
+test('/sessions lists other sessions and /tell delivers', async ($, on) => {
   const saved = new Map<string, unknown>([['peers', { 'bbbbbbbb-2222': { t: 0, cwd: '/other', model: 'opus' } }]])
   stubs(on, saved, 'Run it')
   let sentTo = ''
   on('session.send', ($: any, e: any) => { sentTo = String(e.to); return { isDelivered: true } })
   await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })
-  const peers: any = await $.command.run({ command: 'peers', args: '' })
+  const peers: any = await $.command.run({ command: 'sessions', args: '' })
   expect(peers.text).toContain('bbbbbbbb')
   const tell: any = await $.command.run({ command: 'tell', args: 'bbbb hello there' })
   expect(tell.text).toContain('Sent')
@@ -62,4 +62,17 @@ test('summary is stored after a turn and pane draws pet + peers', async ($, on) 
   const ui = await $.ui.mount({ plugin: 'robin-mods', component: 'Pane', requestId: 'live', surface: 'terminal', viewport: { columns: 100, rows: 30 }, props: { title: 'Live', isFocused: true, bodyColumns: 60, placement: 'inline', scroll: { offset: 0, bodyRows: 10 }, view: {} } } as any)
   expect(await ui.find({ type: 'Text', text: /5h .* 85%/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /Fixing a dbt model/ })).toBeDefined()
+})
+
+test('no summary call is made when sessionSummary is off', { options: { sessionSummary: false } }, async ($, on) => {
+  const saved = new Map<string, unknown>()
+  const clock = stubs(on, saved, 'Run it')
+  let calls = 0
+  on('session.messages', () => ({ value: [{ role: 'user', text: 'fix the dbt model', toolUses: [] }] }))
+  on('model.complete', () => { calls++; return { value: { isAnswered: true, text: 'x', usage: {} } } })
+  on('turn.complete', () => ({ text: '' }))
+  await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })
+  await $.turn.complete({ turnId: 't', answer: 'ok', durationMs: 1000, isAborted: false, usage: null })
+  await clock.advance(2500)
+  expect(calls).toBe(0)
 })

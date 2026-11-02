@@ -8,6 +8,12 @@
       "title": "Identical calls allowed in a row",
       "description": "The call after this many identical ones is refused",
       "default": 3
+    },
+    "allowlist": {
+      "type": "string",
+      "title": "Calls that may repeat",
+      "description": "Comma-separated tool names or Bash command prefixes never counted as a loop (polling calls)",
+      "default": "TaskOutput,BashOutput,gh run view,git status"
     }
   },
   "author": {

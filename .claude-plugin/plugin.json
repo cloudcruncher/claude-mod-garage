@@ -1,7 +1,15 @@
 {
   "name": "session-deck",
   "version": "0.1.0",
-  "description": "See and message your other live Claude sessions (/live, /peers, /tell), confirm risky shell commands, chime after long turns.",
+  "description": "See and message your other live Claude sessions (/live, /sessions, /tell), confirm risky shell commands, chime after long turns.",
+  "userConfig": {
+    "sessionSummary": {
+      "type": "boolean",
+      "title": "Summarise sessions with a small model",
+      "description": "After each turn, send the last few messages to the haiku model for a one-line summary shown in /live and /sessions. Off: no summary is made and nothing extra is sent",
+      "default": true
+    }
+  },
   "author": {
     "name": "Robin Saini"
   },

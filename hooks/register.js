@@ -66,7 +66,9 @@ async function summarise($) {
   } catch {}
 }
 
-export function register(on) {
+export function register(on, options) {
+  // The haiku summary sends the last few messages to the model provider; this switch turns it off.
+  const summaries = !options || options.sessionSummary !== false
   on('command.run', { command: 'live' }, async ($) => {
     await $.ui.open({ id: PANE, title: 'Live', closeOnEscape: true })
     return {}
@@ -108,12 +110,12 @@ export function register(on) {
       $.ui.invalidate('ui.render')
     })
     try { await $.command.register({ name: 'live', description: 'Open the live pane: peers, usage, pet' }) } catch {}
-    try { await $.command.register({ name: 'peers', description: 'List your other live Claude sessions' }) } catch {}
+    try { await $.command.register({ name: 'sessions', description: 'List your other live Claude sessions' }) } catch {}
     try { await $.command.register({ name: 'tell', description: 'Message another session: /tell <id-prefix> <text>', argumentHint: '<id-prefix> <text>' }) } catch {}
     return next(e)
   })
 
-  on('command.run', { command: 'peers' }, async ($) => {
+  on('command.run', { command: 'sessions' }, async ($) => {
     const me = await $.session.id()
     const all = await heartbeat($)
     const rows = Object.entries(all).filter(([k]) => k !== me).map(([k, v]) => `${k.slice(0, 8)}  ${v.model}  ${v.cwd}  ${v.summary || ''}`)
@@ -124,7 +126,7 @@ export function register(on) {
     const [prefix, ...rest] = (e.args || '').trim().split(/\s+/)
     const all = (await $.store.get(PEERS)) || {}
     const hits = Object.keys(all).filter((k) => prefix && k.startsWith(prefix))
-    if (hits.length !== 1 || !rest.length) return { text: 'Usage: /tell <id-prefix> <text> (prefix must match exactly one peer; see /peers)' }
+    if (hits.length !== 1 || !rest.length) return { text: 'Usage: /tell <id-prefix> <text> (prefix must match exactly one peer; see /sessions)' }
     const r = await $.session.send({ to: { sessionId: hits[0] }, text: rest.join(' ') })
     return { text: r.isDelivered ? 'Sent to ' + hits[0].slice(0, 8) : 'Not delivered: ' + r.reason }
   })
@@ -147,7 +149,7 @@ export function register(on) {
   })
 
   on('turn.complete', async ($, e, next) => {
-    if (!e.agentId) $.clock.after(0, () => summarise($))
+    if (summaries && !e.agentId) $.clock.after(0, () => summarise($))
     if (!e.agentId && (e.durationMs || 0) > 30_000) { try { await $.audio.play('done') } catch {} }
     return next(e)
   })

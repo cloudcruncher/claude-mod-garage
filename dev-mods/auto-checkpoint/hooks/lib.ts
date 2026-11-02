@@ -33,7 +33,19 @@ export function filePathsFor(tool: string, input: Record<string, unknown>): stri
   return typeof v === 'string' && v !== '' ? [v] : []
 }
 
-export type RiskyBash = { paths: string[]; wholeTree: boolean }
+/** `unsnapshotted` is set for commands (git clean) whose casualties are untracked files no snapshot can cover. */
+export type RiskyBash = { paths: string[]; wholeTree: boolean; unsnapshotted?: boolean }
+
+/** Directories and files bigger than this are not copied into a checkpoint. */
+export const MAX_SNAPSHOT_KB = 50 * 1024
+
+/** Why a path should not be snapshotted, or undefined when it is fine to copy. */
+export function skipReason(path: string, sizeKb: number | undefined): string | undefined {
+  const seg = path.split('/')
+  if (seg.includes('node_modules') || seg.includes('.git')) return 'inside node_modules or .git'
+  if (sizeKb !== undefined && sizeKb > MAX_SNAPSHOT_KB) return `larger than ${MAX_SNAPSHOT_KB / 1024}MB`
+  return undefined
+}
 
 function splitWords(s: string): string[] {
   const out: string[] = []
@@ -45,13 +57,14 @@ function splitWords(s: string): string[] {
 
 /**
  * Says which paths a shell command may destroy. `wholeTree` means the tracked
- * changes of the repo are at risk (git reset --hard, git checkout -- .).
+ * changes of the repo are at risk (git reset --hard, git checkout -- ., git stash).
  * Returns undefined when the command is not risky.
  */
 export function riskyBash(command: string): RiskyBash | undefined {
   const paths: string[] = []
   let wholeTree = false
   let risky = false
+  let unsnapshotted = false
   for (const segment of command.split(/&&|\|\||;|\|/)) {
     const words = splitWords(segment.trim())
     while (words[0] === 'sudo' || words[0] === 'command' || /^\w+=/.test(words[0] ?? '')) words.shift()
@@ -63,17 +76,22 @@ export function riskyBash(command: string): RiskyBash | undefined {
     } else if (cmd === 'git' && args[0] === 'reset' && args.includes('--hard')) {
       risky = true
       wholeTree = true
-    } else if (cmd === 'git' && args[0] === 'checkout' && args.includes('--')) {
+    } else if (cmd === 'git' && args[0] === 'checkout' && (args.includes('--') || args.includes('.'))) {
       risky = true
-      const rest = args.slice(args.indexOf('--') + 1)
+      const rest = args.includes('--') ? args.slice(args.indexOf('--') + 1) : args.slice(1)
       if (rest.length === 0 || rest.includes('.')) wholeTree = true
       else paths.push(...rest)
+    } else if (cmd === 'git' && args[0] === 'stash' && !['list', 'show', 'apply', 'branch'].includes(args[1] ?? '')) {
+      // stash (push, pop, drop, clear) rewrites the working tree
+      risky = true
+      wholeTree = true
     } else if (cmd === 'git' && (args[0] === 'clean' || args[0] === 'restore')) {
       risky = true
       if (args[0] === 'restore') wholeTree = true
+      else if (!args.some(a => a === '-n' || a === '--dry-run')) unsnapshotted = true
     }
   }
-  return risky ? { paths: [...new Set(paths)], wholeTree } : undefined
+  return risky ? { paths: [...new Set(paths)], wholeTree, ...(unsnapshotted ? { unsnapshotted } : {}) } : undefined
 }
 
 /** Resolves a path against cwd without touching the file system. */

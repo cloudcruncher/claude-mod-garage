@@ -70,7 +70,8 @@ export function addedLines(diff: string): string {
     .join('\n')
 }
 
-export type GitOp = { kind: 'commit' | 'add' | 'push'; args: string[] }
+/** `dirs` are the directories git must run in, outermost first: a leading `cd <dir> &&`, then each `git -C <dir>`. */
+export type GitOp = { kind: 'commit' | 'add' | 'push'; args: string[]; dirs?: string[] }
 
 /** Same-length copy with heredoc bodies and quoted text blanked, so words inside them are not read as commands. */
 function maskLiterals(command: string): string {
@@ -85,38 +86,63 @@ export function gitOps(command: string): GitOp[] {
   const ops: GitOp[] = []
   const masked = maskLiterals(command)
   let offset = 0
+  let cdDir: string | undefined
+  const unquote = (a: string): string => a.replace(/^["']|["']$/g, '')
   for (const segment of masked.split(/&&|\|\||;|\n/)) {
     const start = masked.indexOf(segment, offset)
     offset = start + segment.length
+    const cd = /^\s*cd\s+("[^"]*"|'[^']*'|\S+)\s*$/.exec(command.slice(start, start + segment.length))
+    if (cd) {
+      const to = unquote(cd[1] ?? '')
+      // a relative cd builds on the previous one
+      cdDir = cdDir && !to.startsWith('/') && !to.startsWith('~') ? `${cdDir.replace(/\/$/, '')}/${to}` : to
+      continue
+    }
     // git must be the command itself, not a word inside an argument
-    const m = /^\s*(?:\w+=\S*\s+)*git\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|add|push)\b(.*)$/s.exec(segment)
+    const m = /^\s*(?:\w+=\S*\s+)*git\s+((?:-C\s+\S+\s+|-c\s+\S+\s+)*)(commit|add|push)\b(.*)$/s.exec(segment)
     if (!m) continue
-    const rest = command.slice(start + segment.length - (m[2] ?? '').length, start + segment.length)
+    const optsEnd = m[0].length - (m[3] ?? '').length - (m[2] ?? '').length
+    const opts = command.slice(start + optsEnd - (m[1] ?? '').length, start + optsEnd)
+    const dirs = [...(cdDir ? [cdDir] : []), ...[...opts.matchAll(/-C\s+("[^"]*"|'[^']*'|\S+)/g)].map(x => unquote(x[1] ?? ''))]
+    const rest = command.slice(start + segment.length - (m[3] ?? '').length, start + segment.length)
     const args = rest.match(/"[^"]*"|'[^']*'|\S+/g) ?? []
-    ops.push({ kind: m[1] as GitOp['kind'], args: args.map(a => a.replace(/^["']|["']$/g, '')) })
+    ops.push({ kind: m[2] as GitOp['kind'], args: args.map(unquote), ...(dirs.length > 0 ? { dirs } : {}) })
   }
   return ops
 }
 
 const PROTECTED_BRANCH = /^(?:main|master)$/
 
-/** Returns a deny reason for a git push, or undefined when it is allowed. */
-export function pushDenyReason(args: string[], currentBranch?: string): string | undefined {
+/**
+ * Returns a deny reason for a git push, or undefined when it is allowed.
+ * `blockMain` false lets pushes to main or master through; force pushes stay blocked.
+ */
+export function pushDenyReason(args: string[], currentBranch?: string, blockMain = true): string | undefined {
   const isForce = args.some(
     a => a === '-f' || /^--force(?:-with-lease|-if-includes)?(?:=.*)?$/.test(a) || /^\+\S/.test(a) ||
       (/^-[a-zA-Z]+$/.test(a) && a.includes('f')),
   )
   if (isForce) return 'force pushes are not allowed here; push normally or ask the user to do it'
+  if (args.includes('--mirror')) return 'mirror pushes overwrite every remote ref and are not allowed here'
   const positional = args.filter(a => !a.startsWith('-'))
   const refspecs = positional.slice(1) // first positional is the remote
-  const targets = refspecs.map(r => (r.includes(':') ? (r.split(':').pop() ?? '') : r))
+  if (!blockMain) return undefined
+  // A bare ':' pushes every matching branch, main included, so it is treated like --all.
+  const matching = refspecs.includes(':')
+  // HEAD means the branch we are on; when that is unknown, a protected push cannot be ruled out
+  const unknownHead = currentBranch === undefined && (refspecs.length === 0 || refspecs.some(r => r === 'HEAD' || r.endsWith(':HEAD')))
+  if (blockMain && unknownHead) return 'could not tell which branch HEAD is, so a push to main or master cannot be ruled out'
+  const targets = refspecs
+    .filter(r => r !== ':')
+    .map(r => (r.includes(':') ? (r.split(':').pop() ?? '') : r))
+    .map(t => (t === 'HEAD' ? (currentBranch ?? t) : t))
   if (targets.some(t => PROTECTED_BRANCH.test(t.replace(/^refs\/heads\//, '')))) {
     return 'pushing to main or master is blocked; push a branch and open a pull request'
   }
   if (refspecs.length === 0 && currentBranch !== undefined && PROTECTED_BRANCH.test(currentBranch)) {
     return `you are on ${currentBranch}; pushing to main or master is blocked`
   }
-  if (args.includes('--all') || args.includes('--mirror')) {
+  if (args.includes('--all') || matching) {
     return 'pushing all refs would include main or master; push a named branch instead'
   }
   return undefined
