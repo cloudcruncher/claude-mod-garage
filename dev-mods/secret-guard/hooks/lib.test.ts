@@ -83,6 +83,50 @@ test('pushDenyReason blocks main/master and force, allows feature branches', () 
   expect(pushDenyReason(['--all'])).toBeDefined()
 })
 
+test('pushDenyReason resolves HEAD to the current branch', () => {
+  expect(pushDenyReason(['origin', 'HEAD'], 'main')).toBeDefined()
+  expect(pushDenyReason(['origin', 'HEAD'], 'feat')).toBeUndefined()
+  expect(pushDenyReason(['origin', 'HEAD:feat'], 'main')).toBeUndefined()
+})
+
+test('pushDenyReason: bare colon pushes all matching branches, even from a feature branch', () => {
+  expect(pushDenyReason(['origin', ':'], 'feat')).toBeDefined()
+  expect(pushDenyReason(['origin', ':'], 'feat', false)).toBeUndefined()
+})
+
+test('pushDenyReason fails closed when HEAD cannot be resolved', () => {
+  expect(pushDenyReason([], undefined)).toBeDefined()
+  expect(pushDenyReason(['origin'], undefined)).toBeDefined()
+  expect(pushDenyReason(['origin', 'HEAD'], undefined)).toBeDefined()
+  expect(pushDenyReason(['origin', 'feat'], undefined)).toBeUndefined()
+  expect(pushDenyReason([], undefined, false)).toBeUndefined()
+})
+
+test('--mirror is refused even when blockMain is off', () => {
+  expect(pushDenyReason(['--mirror', 'origin'], 'feat', false)).toContain('mirror')
+})
+
+test('gitOps joins relative cd paths', () => {
+  expect(gitOps('cd /a && cd b && git push')[0]?.dirs).toEqual(['/a/b'])
+  expect(gitOps('cd /a && cd /c && git push')[0]?.dirs).toEqual(['/c'])
+  expect(gitOps('cd ~/x && git push')[0]?.dirs).toEqual(['~/x'])
+})
+
+test('pushDenyReason lets main through when blockMain is off, but not force', () => {
+  expect(pushDenyReason(['origin', 'main'], 'main', false)).toBeUndefined()
+  expect(pushDenyReason([], 'main', false)).toBeUndefined()
+  expect(pushDenyReason(['--all'], undefined, false)).toBeUndefined()
+  expect(pushDenyReason(['--force', 'origin', 'main'], 'main', false)).toContain('force')
+})
+
+test('gitOps reports cd and git -C directories', () => {
+  expect(gitOps('cd /repo/sub && git push origin main')[0]?.dirs).toEqual(['/repo/sub'])
+  expect(gitOps('git -C /other commit -m x')[0]?.dirs).toEqual(['/other'])
+  expect(gitOps('cd "/a b" && git -C c add .')[0]?.dirs).toEqual(['/a b', 'c'])
+  expect(gitOps('git add .')[0]?.dirs).toBeUndefined()
+  expect(gitOps('git add .')[0]?.kind).toBe('add')
+})
+
 test('isBroadStage', () => {
   expect(isBroadStage({ kind: 'add', args: ['.'] })).toBe(true)
   expect(isBroadStage({ kind: 'add', args: ['src/a.ts'] })).toBe(false)

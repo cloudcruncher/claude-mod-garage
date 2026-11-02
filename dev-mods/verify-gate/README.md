@@ -2,7 +2,7 @@
 
 Runs your tests, lint and type-check after edits, and feeds failures back.
 
-After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Docs, images and config edits are ignored.
+After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest only when declared in pyproject.toml or requirements, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Checks run with `CI=1` so test runners do not start watch mode. Docs, images and config edits are ignored.
 
 ## Install
 

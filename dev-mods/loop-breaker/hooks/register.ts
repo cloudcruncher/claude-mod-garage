@@ -1,14 +1,23 @@
 import type { Register } from 'claude-code'
-import { shouldBlock, signature, streak } from './lib'
+import { isAllowed, parseAllowlist, parseMaxRepeats, shouldBlock, signature, streak } from './lib'
 
 const KEEP = 20
 
 export const register: Register = (on, options) => {
-  const maxRepeats = Math.max(2, Number(options?.maxRepeats ?? 3))
+  const maxRepeats = parseMaxRepeats(options?.maxRepeats)
+  const allowlist = parseAllowlist(options?.allowlist)
   // One history per loop, so a subagent repeating itself is judged on its own calls.
   const history = new Map<string, string[]>()
 
+  // A new turn is a new chance: a command repeated across turns is not a loop.
+  on('turn.start', ($, e, next) => {
+    history.clear()
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
   on('tool.call', ($, e, next) => {
+    // polling calls are meant to repeat
+    if (isAllowed(e.tool, (e as { command?: unknown }).command, allowlist)) return next(e)
     const loop = e.agentId ?? 'main'
     const past = history.get(loop) ?? []
     const sig = signature(e.tool, e as unknown as Record<string, unknown>)

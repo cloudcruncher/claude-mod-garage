@@ -1,6 +1,6 @@
 import { test, expect } from 'claude-code/testing'
 import {
-  detectChecks, detectPackageManager, tailOutput, failureMessage, winsLine, projectName, MAX_RETRIES, isCodeEdit,
+  detectChecks, detectPackageManager, tailOutput, failureMessage, projectName, MAX_RETRIES, isCodeEdit,
 } from './lib.ts'
 
 const pkg = (scripts: Record<string, string>): string => JSON.stringify({ scripts })
@@ -37,6 +37,13 @@ test('python checks use uv and only what is configured', () => {
   expect(detectChecks({ names: [], pyproject: '[project]\nname="x"\n' })).toEqual([])
 })
 
+test('pytest needs to be declared, a tests folder alone is not enough', () => {
+  const bare = '[project]\nname="x"\n'
+  expect(detectChecks({ names: ['tests'], pyproject: bare })).toEqual([])
+  expect(detectChecks({ names: [], pyproject: bare, requirements: 'requests\npytest>=8\n' }).map(c => c.name)).toEqual(['pytest'])
+  expect(detectChecks({ names: [], pyproject: bare, requirements: 'requests\n' })).toEqual([])
+})
+
 test('makefile test target', () => {
   expect(detectChecks({ names: [], makefile: 'build:\n\tcc x\n\ntest:\n\t./t\n' })[0]?.argv).toEqual(['make', 'test'])
   expect(detectChecks({ names: [], makefile: 'build:\n\tcc x\n' })).toEqual([])
@@ -63,8 +70,7 @@ test('failureMessage includes failing output verbatim and skips passes', () => {
   expect(msg).toContain(`attempt 2 of ${MAX_RETRIES}`)
 })
 
-test('winsLine format and projectName', () => {
-  expect(winsLine('2026-10-08T12:00:00.000Z', 'proj', ['npm test', 'npm run lint'])).toBe('2026-10-08 | proj | npm test, npm run lint')
+test('projectName', () => {
   expect(projectName('/a/b/proj/')).toBe('proj')
 })
 

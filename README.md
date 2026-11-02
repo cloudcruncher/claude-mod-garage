@@ -24,6 +24,7 @@ Try one without installing: `git clone https://github.com/cloudcruncher/claude-m
 
 - A Claude Code build that supports plugin hook modules (`hooks/hooks.json` with a `"modules"` list). If `/plugin install` succeeds but nothing happens, your build is probably too old.
 - The mods are TypeScript hook modules that Claude Code loads itself. There is nothing to compile and no runtime to install.
+- Tested with Claude Code 2.1.316. Older builds may lack hook-module support.
 - Built and tested on macOS. Side panes dock beside the conversation from about 110 terminal columns; on narrower terminals they may not be shown.
 - `verify-gate` and `git-band` shell out to your own tools (`npm`, `uv`, `make`, `git`). Those need to be on your `PATH`.
 
@@ -69,7 +70,7 @@ _Run several Claude sessions and keep them aware of each other._
 
 | Mod | What it does | Activate |
 | --- | --- | --- |
-| **session-deck** (repo root) | See and message your other live Claude sessions. | `/live` opens the pane, `/peers` lists sessions, `/tell <id-prefix> <text>` messages one. |
+| **session-deck** (repo root) | See and message your other live Claude sessions. | `/live` opens the pane, `/sessions` lists sessions, `/tell <id-prefix> <text>` messages one. |
 
 ### Wellbeing & fun
 
@@ -264,7 +265,7 @@ Shows `5h NN% | ctx NN%` in the status line, toasts once when your 5-hour usage 
 <details>
 <summary><b>secret-guard</b>: Stops secrets being written, committed or pushed.</summary>
 
-Refuses to write `.env`, `.pem`, SSH keys and credentials files, refuses commands that contain API keys or high-entropy tokens, blocks `git add`/`commit` of staged secrets, and blocks pushes to main/master and force pushes. `.env.example`-style files are allowed.
+Refuses to write `.env`, `.pem`, SSH keys and credentials files, refuses to write file content that looks like an API key or token, refuses commands that contain API keys or high-entropy tokens, blocks `git add`/`commit` of staged secrets, and blocks force pushes and (by default) pushes to main/master. Git commands are checked in the directory they run in, including `cd <dir> &&` and `git -C <dir>`. `.env.example`-style files are allowed.
 
 **Install**
 
@@ -289,6 +290,14 @@ secret-guard: refusing to write .env. .env is an environment file that usually h
 ```
 secret-guard: git push blocked: pushing to main is not allowed.
 ```
+
+**Options**
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `blockMainPush` | on | Refuse every git push to main or master (force pushes are always refused) |
+
+Set options when installing, or later in `/plugin` → the mod → configure.
 **Notes**
 
 - Fails closed: if the guard itself errors, the write or git command is blocked.
@@ -298,7 +307,7 @@ secret-guard: git push blocked: pushing to main is not allowed.
 <details>
 <summary><b>loop-breaker</b>: Cuts off a model that keeps repeating the same tool call.</summary>
 
-If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls. If the hook errors it fails open.
+If the same tool is called with identical arguments more than N times in a row, the next call is refused with a message telling the model to change approach, and you get a toast. Each subagent is judged on its own calls, and the count starts again each turn. If the hook errors it fails open.
 
 **Install**
 
@@ -328,7 +337,8 @@ loop-breaker: refused a Bash call repeated 4 times
 
 | Option | Default | What it does |
 | --- | --- | --- |
-| `maxRepeats` | 3 | Identical calls allowed in a row |
+| `maxRepeats` | 3 | Identical calls allowed in a row (a positive whole number; anything else uses 3) |
+| `allowlist` | TaskOutput,BashOutput,gh run view,git status | Comma-separated tool names or Bash command prefixes that may repeat, such as polling calls |
 
 Set options when installing, or later in `/plugin` → the mod → configure.
 
@@ -378,7 +388,7 @@ Read-only mode is on (the user ran /readonly on). Do not edit files; describe th
 <details>
 <summary><b>auto-checkpoint</b>: Automatic snapshots before edits, so any change is undoable.</summary>
 
-Snapshots files before the model edits them or runs risky shell commands. `/rewind-to` lists the checkpoints and restores one.
+Snapshots files before the model edits them or runs risky shell commands (rm, mv, git reset --hard, git checkout ., git stash, git clean). `/rewind-to` lists the checkpoints and restores one. Files over 50MB, node_modules and .git are skipped and the skip is logged; `git clean` deletes untracked files, which cannot be snapshotted, so you get a warning instead.
 
 **Install**
 
@@ -389,11 +399,11 @@ Snapshots files before the model edits them or runs risky shell commands. `/rewi
 **Use it**
 
 - Snapshots are automatic.
-- `/rewind-to list` shows checkpoints; `/rewind-to 2` restores checkpoint 2.
+- `/rewind-to` shows checkpoints; `/rewind-to 2` restores checkpoint 2; `/rewind-to last` restores the newest.
 
 **What you'll see** _(illustrative)_
 
-**/rewind-to list**
+**/rewind-to**
 
 ```
 1  14:02  Edit src/auth.ts
@@ -410,6 +420,7 @@ restored src/auth.ts
 **Notes**
 
 - Output format shown is illustrative.
+- Privacy: checkpoints are full copies of the files you edit or delete, stored in `~/.claude/checkpoints/<session>/` (not in your project). That includes `.env` and other secret files if they are touched. The newest 200 checkpoints are kept; delete the folder to clear them.
 
 </details>
 
@@ -450,7 +461,7 @@ Context is nearly full (85% or more). Wrap up the current step, then run /compac
 <details>
 <summary><b>verify-gate</b>: Runs your tests, lint and type-check after edits, and feeds failures back.</summary>
 
-After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Docs, images and config edits are ignored.
+After a turn that edited code, detects your project's fast checks (npm/pnpm/yarn/bun scripts for test, lint, typecheck; pytest only when declared in pyproject.toml or requirements, ruff, mypy/pyright via uv; `make test`) and runs them. Failures go back to the model so it fixes them, up to 3 retries. Checks run with `CI=1` so test runners do not start watch mode. Docs, images and config edits are ignored.
 
 **Install**
 
@@ -578,7 +589,7 @@ Journal written to .claude/journal/2026-10-14-09-30.md (23 entries).
 <details>
 <summary><b>session-deck</b>: See and message your other live Claude sessions.</summary>
 
-Keeps a shared roster of your running sessions (project, model, one-line AI summary of what each is doing). `/live` opens a pane with the roster, usage bars and a small pet; `/peers` lists other sessions; `/tell` sends one a message. Also asks before risky shell commands (force-delete, force-push, publishing) and chimes after turns longer than 30s.
+Keeps a shared roster of your running sessions (project, model, one-line AI summary of what each is doing, made by sending your last few messages to the haiku model after each turn; switch it off with the `sessionSummary` option). `/live` opens a pane with the roster, usage bars and a small pet; `/sessions` lists other sessions; `/tell` sends one a message. Also asks before risky shell commands (force-delete, force-push, publishing) and chimes after turns longer than 30s.
 
 **Install**
 
@@ -588,12 +599,12 @@ Keeps a shared roster of your running sessions (project, model, one-line AI summ
 
 **Use it**
 
-- `/live` opens the pane, `/peers` lists sessions, `/tell <id-prefix> <text>` messages one.
+- `/live` opens the pane, `/sessions` lists sessions, `/tell <id-prefix> <text>` messages one.
 - The risky-command prompt and the chime are automatic.
 
 **What you'll see** _(illustrative)_
 
-**/peers**
+**/sessions**
 
 ```
 a1b2c3d4  sonnet  /work/api   fixing token refresh bug
@@ -612,6 +623,14 @@ Sent to 9f8e7d6c
 DESTRUCTIVE: force/recursive delete | run it? rm -rf src
   [Run it]  [Refuse]
 ```
+
+**Options**
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `sessionSummary` | on | After each turn, send the last few messages to the haiku model for a one-line summary. Off: no summary and nothing extra sent |
+
+Set options when installing, or later in `/plugin` → the mod → configure.
 **Notes**
 
 - Sessions only see each other on the same machine and user.
@@ -704,8 +723,9 @@ Tiny text-mode games that run inside Claude Code. /doom is a raycaster with wand
 
 - `secret-guard` fails closed: if the guard itself errors, the write or git command is blocked. `loop-breaker` fails open so a bug in it never stops your work.
 - `read-only-mode` is a guardrail on the model's tool calls, not a sandbox.
-- `session-journal` and `auto-checkpoint` write inside your project (`.claude/journal/`, checkpoints). Add them to `.gitignore` if you do not want them committed.
-- Nothing in this repo makes network calls of its own, and no mod sends your prompts anywhere.
+- `session-journal` writes inside your project (`.claude/journal/`); add it to `.gitignore` if you do not want it committed. `auto-checkpoint` stores full copies of edited files, `.env` included, in `~/.claude/checkpoints/` outside your project; delete that folder to clear them.
+- Nothing in this repo makes its own network calls. One mod does send data to the model provider: `session-deck` sends your last few messages to the haiku model after each turn to write a one-line session summary (your Claude Code account, same as normal use). Turn it off with its `sessionSummary` option. No other mod sends your prompts anywhere.
+- Tests: run `claude plugin test dev-mods/<mod>` for each mod. `claude plugin test .` at the repo root also runs every nested mod's tests with the root session-deck module loaded underneath them; 7 of those nested tests fail only because of that (they do not stub the root module's calls), so test the mods individually. The root module's own tests are in `tests/` and pass there.
 
 ## Troubleshooting
 
